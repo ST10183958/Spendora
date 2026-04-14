@@ -1,4 +1,7 @@
-package com.menak.login.data
+package com.menak.login.data.Repository
+
+import com.menak.login.data.Dao.UserDao
+import com.menak.login.data.Entity.UserEntity
 
 class AuthRepository(private val userDao: UserDao) {
 

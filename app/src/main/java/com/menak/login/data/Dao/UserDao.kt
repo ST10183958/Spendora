@@ -1,14 +1,15 @@
-package com.menak.login.data
+package com.menak.login.data.Dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.menak.login.data.Entity.UserEntity
 
 @Dao
 interface UserDao {
 
-    @Insert(onConflict = OnConflictStrategy.ABORT)
+    @Insert(onConflict = OnConflictStrategy.Companion.ABORT)
     suspend fun insertUser(user: UserEntity)
 
     @Query("SELECT * FROM users WHERE username = :username LIMIT 1")

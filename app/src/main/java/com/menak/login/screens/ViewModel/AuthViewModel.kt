@@ -1,9 +1,10 @@
-package com.menak.login.screens
+package com.menak.login.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.menak.login.data.AuthRepository
+import com.menak.login.data.Repository.AuthRepository
+import com.menak.login.screens.State.AuthUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,11 +38,19 @@ class AuthViewModel(
 
         viewModelScope.launch {
             val result = repository.register(username, password)
-            _uiState.value = _uiState.value.copy(
-                message = result.fold(
-                    onSuccess = { it },
-                    onFailure = { it.message ?: "Registration failed" }
-                )
+            result.fold(
+                onSuccess = {
+                    _uiState.value = _uiState.value.copy(
+                        message = "Account created successfully. You can now use the app.",
+                        isLoggedIn = true,
+                        loggedInUsername = username
+                    )
+                },
+                onFailure = {
+                    _uiState.value = _uiState.value.copy(
+                        message = it.message ?: "Registration failed"
+                    )
+                }
             )
         }
     }
@@ -69,7 +78,7 @@ class AuthViewModel(
                 },
                 onFailure = {
                     _uiState.value = _uiState.value.copy(
-                        message = it.message ?: "Login failed"
+                        message = it.message ?: "Invalid username or password"
                     )
                 }
             )
@@ -84,6 +93,7 @@ class AuthViewModel(
 class AuthViewModelFactory(
     private val repository: AuthRepository
 ) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return AuthViewModel(repository) as T
     }

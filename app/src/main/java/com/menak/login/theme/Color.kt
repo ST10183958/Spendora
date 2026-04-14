@@ -1,4 +1,4 @@
-package com.menak.login.ui.theme
+package com.menak.login.theme
 
 import androidx.compose.ui.graphics.Color
 

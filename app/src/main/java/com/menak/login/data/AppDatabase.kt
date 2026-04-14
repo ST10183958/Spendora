@@ -4,15 +4,27 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.menak.login.data.Dao.CategoryDao
+import com.menak.login.data.Dao.ExpenseDao
+import com.menak.login.data.Dao.UserDao
+import com.menak.login.data.Entity.CategoryEntity
+import com.menak.login.data.Entity.ExpenseEntity
+import com.menak.login.data.Entity.UserEntity
 
 @Database(
-    entities = [UserEntity::class],
-    version = 1,
+    entities = [
+        UserEntity::class,
+        CategoryEntity::class,
+        ExpenseEntity::class
+    ],
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
+    abstract fun categoryDao(): CategoryDao
+    abstract fun expenseDao(): ExpenseDao
 
     companion object {
         @Volatile
@@ -23,8 +35,11 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "login_database"
-                ).build()
+                    "app_database"
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+
                 INSTANCE = instance
                 instance
             }

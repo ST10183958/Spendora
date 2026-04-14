@@ -3,13 +3,20 @@ package com.menak.login
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.menak.login.data.AppDatabase
-import com.menak.login.data.AuthRepository
-import com.menak.login.screens.AuthScreen
-import com.menak.login.screens.AuthViewModel
-import com.menak.login.screens.AuthViewModelFactory
-import com.menak.login.ui.theme.RoomLoginTheme
+import com.menak.login.data.Repository.AuthRepository
+import com.menak.login.data.Repository.ExpenseRepository
+import com.menak.login.navigation.AppNavGraph
+import com.menak.login.ui.AuthScreen
+import com.menak.login.ui.AuthViewModel
+import com.menak.login.ui.AuthViewModelFactory
+import com.menak.login.ui.ExpenseViewModel
+import com.menak.login.ui.ExpenseViewModelFactory
+import com.menak.login.theme.LoginTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -17,13 +24,36 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val database = AppDatabase.getDatabase(applicationContext)
-        val repository = AuthRepository(database.userDao())
-        val factory = AuthViewModelFactory(repository)
+
+        val authRepository = AuthRepository(database.userDao())
+        val authFactory = AuthViewModelFactory(authRepository)
+
+        val expenseRepository = ExpenseRepository(
+            categoryDao = database.categoryDao(),
+            expenseDao = database.expenseDao()
+        )
+        val expenseFactory = ExpenseViewModelFactory(expenseRepository)
 
         setContent {
-            RoomLoginTheme {
-                val viewModel: AuthViewModel = viewModel(factory = factory)
-                AuthScreen(viewModel = viewModel)
+            LoginTheme {
+                val authViewModel: AuthViewModel = viewModel(factory = authFactory)
+                val expenseViewModel: ExpenseViewModel = viewModel(factory = expenseFactory)
+
+                val authUiState by authViewModel.uiState.collectAsState()
+
+                if (authUiState.isLoggedIn) {
+                    val navController = rememberNavController()
+
+                    AppNavGraph(
+                        navController = navController,
+                        viewModel = expenseViewModel,
+                        onLogout = {
+                            authViewModel.logout()
+                        }
+                    )
+                } else {
+                    AuthScreen(viewModel = authViewModel)
+                }
             }
         }
     }

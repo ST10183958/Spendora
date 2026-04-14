@@ -1,4 +1,4 @@
-package com.menak.login.screens
+package com.menak.login.screens.State
 
 data class AuthUiState(
     val username: String = "",

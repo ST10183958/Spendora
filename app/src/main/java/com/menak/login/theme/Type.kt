@@ -1,4 +1,4 @@
-package com.menak.login.ui.theme
+package com.menak.login.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

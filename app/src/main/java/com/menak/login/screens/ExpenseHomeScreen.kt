@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -89,38 +89,67 @@ fun ExpenseHomeScreen(
                 val categoryIconUri = category?.iconUrl.orEmpty()
 
                 Card(modifier = Modifier.fillMaxWidth()) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(12.dp)
                     ) {
-                        if (categoryIconUri.isNotEmpty()) {
-                            AndroidView(
-                                modifier = Modifier.size(56.dp),
-                                factory = { context ->
-                                    ImageView(context).apply {
-                                        layoutParams = android.view.ViewGroup.LayoutParams(140, 140)
-                                        scaleType = ImageView.ScaleType.CENTER_CROP
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (expense.expenseIconUrl.isNotEmpty()) {
+                                AndroidView(
+                                    modifier = Modifier.size(56.dp),
+                                    factory = { context ->
+                                        ImageView(context).apply {
+                                            layoutParams = android.view.ViewGroup.LayoutParams(140, 140)
+                                            scaleType = ImageView.ScaleType.CENTER_CROP
+                                        }
+                                    },
+                                    update = { imageView ->
+                                        try {
+                                            imageView.setImageURI(Uri.parse(expense.expenseIconUrl))
+                                        } catch (_: Exception) {
+                                            imageView.setImageDrawable(null)
+                                        }
                                     }
-                                },
-                                update = { imageView ->
-                                    try {
-                                        imageView.setImageURI(Uri.parse(categoryIconUri))
-                                    } catch (_: Exception) {
-                                        imageView.setImageDrawable(null)
-                                    }
-                                }
-                            )
+                                )
 
-                            Spacer(modifier = Modifier.size(12.dp))
+                                Spacer(modifier = Modifier.size(12.dp))
+                            }
+
+                            if (categoryIconUri.isNotEmpty()) {
+                                AndroidView(
+                                    modifier = Modifier.size(40.dp),
+                                    factory = { context ->
+                                        ImageView(context).apply {
+                                            layoutParams = android.view.ViewGroup.LayoutParams(100, 100)
+                                            scaleType = ImageView.ScaleType.CENTER_CROP
+                                        }
+                                    },
+                                    update = { imageView ->
+                                        try {
+                                            imageView.setImageURI(Uri.parse(categoryIconUri))
+                                        } catch (_: Exception) {
+                                            imageView.setImageDrawable(null)
+                                        }
+                                    }
+                                )
+
+                                Spacer(modifier = Modifier.size(12.dp))
+                            }
+
+                            Column {
+                                Text("Expense: ${expense.expenseName}")
+                                Text("Category: $categoryName")
+                                Text("Amount: R %.2f".format(expense.amount))
+                            }
                         }
 
-                        Column {
-                            Text("Expense: ${expense.expenseName}")
-                            Text("Category: $categoryName")
-                            Text("Amount: R %.2f".format(expense.amount))
-                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Start Date: ${expense.startDate}")
+                        Text("End Date: ${expense.endDate}")
+                        Text("Description: ${expense.description}")
                     }
                 }
             }

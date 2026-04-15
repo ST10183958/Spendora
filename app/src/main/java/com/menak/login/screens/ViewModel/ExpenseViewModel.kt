@@ -54,6 +54,22 @@ class ExpenseViewModel(
         _uiState.value = _uiState.value.copy(expenseAmount = value)
     }
 
+    fun onExpenseStartDateChange(value: String) {
+        _uiState.value = _uiState.value.copy(expenseStartDate = value)
+    }
+
+    fun onExpenseEndDateChange(value: String) {
+        _uiState.value = _uiState.value.copy(expenseEndDate = value)
+    }
+
+    fun onExpenseDescriptionChange(value: String) {
+        _uiState.value = _uiState.value.copy(expenseDescription = value)
+    }
+
+    fun onExpenseIconUrlChange(value: String) {
+        _uiState.value = _uiState.value.copy(expenseIconIrl = value)
+    }
+
     fun addCategory() {
         val type = _uiState.value.categoryType.trim()
         val iconUri = _uiState.value.categoryIconUri.trim()
@@ -77,18 +93,34 @@ class ExpenseViewModel(
         val name = _uiState.value.expenseName.trim()
         val categoryId = _uiState.value.selectedCategoryId
         val amount = _uiState.value.expenseAmount.toDoubleOrNull()
+        val startDate = _uiState.value.expenseStartDate.trim()
+        val endDate = _uiState.value.expenseEndDate.trim()
+        val description = _uiState.value.expenseDescription.trim()
+        val iconUrl = _uiState.value.expenseIconIrl.trim()
 
-        if (name.isEmpty() || categoryId == null || amount == null) {
+        if (
+            name.isEmpty() ||
+            categoryId == null ||
+            amount == null ||
+            startDate.isEmpty() ||
+            endDate.isEmpty() ||
+            description.isEmpty() ||
+            iconUrl.isEmpty()
+            ) {
             _uiState.value = _uiState.value.copy(message = "Fill in all expense fields correctly")
             return
         }
 
         viewModelScope.launch {
-            repository.addExpense(name, categoryId, amount)
+            repository.addExpense(name, categoryId, amount, startDate,endDate,description, expenseIconUrl = iconUrl)
             _uiState.value = _uiState.value.copy(
                 expenseName = "",
                 selectedCategoryId = null,
                 expenseAmount = "",
+                expenseStartDate = "",
+                expenseEndDate = "",
+                expenseDescription = "",
+                expenseIconIrl = "",
                 message = "Expense added"
             )
         }

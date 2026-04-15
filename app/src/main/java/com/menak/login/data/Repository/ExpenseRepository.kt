@@ -23,12 +23,25 @@ class ExpenseRepository(
         )
     }
 
-    suspend fun addExpense(name: String, categoryId: Int, amount: Double) {
+    // Add expense input fields
+    suspend fun addExpense(
+        name: String,
+        categoryId: Int,
+        amount: Double,
+        startDate: String,
+        endDate: String,
+        description: String,
+        expenseIconUrl: String
+    ) {
         expenseDao.insertExpense(
             ExpenseEntity(
                 expenseName = name,
                 categoryId = categoryId,
-                amount = amount
+                amount = amount,
+                startDate = startDate,
+                endDate = endDate,
+                description = description,
+                expenseIconUrl = expenseIconUrl
             )
         )
     }

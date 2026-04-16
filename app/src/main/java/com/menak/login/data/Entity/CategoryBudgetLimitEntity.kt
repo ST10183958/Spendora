@@ -3,28 +3,24 @@ package com.menak.login.data.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import java.sql.Date
 
 @Entity(
-    tableName = "expenses",
+    tableName="category_budget_limits",
+    //depends on foreign table
     foreignKeys = [
+        //define the foreign keys
         ForeignKey(
             entity = CategoryEntity::class,
             parentColumns = ["id"],
+            //childColumn stores parentColumns value in this table
             childColumns = ["categoryId"],
             onDelete = ForeignKey.CASCADE
         )
     ]
 )
-data class ExpenseEntity(
-    @PrimaryKey(autoGenerate = true)
+class CategoryBudgetLimitEntity(
+@PrimaryKey
     val id: Int = 0,
-    val expenseName: String,
     val categoryId: Int,
-    val amount: Double,
-    val startDate: String,
-    val endDate: String,
-    val description: String,
-    val expenseIconUrl: String,
-    val receiptPhotoUrl: String
+    val monthlyLimit: Double
 )

@@ -44,15 +44,28 @@ fun AddExpenseScreen(
     val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
 
+    //launchers
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
             val savedUri = copyImageToInternalStorage(context, it)
             if (savedUri != null) {
-                viewModel.onExpenseIconUrlChange(savedUri)
+                viewModel.onExpenseIconUriChange(savedUri)
             } else {
                 viewModel.setMessage("Failed to save selected expense icon")
+            }
+        }
+    }
+    val receiptLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            val savedUri = copyImageToInternalStorage(context, it)
+            if (savedUri != null) {
+                viewModel.onReceiptPhotoUriChange(savedUri)
+            } else {
+                viewModel.setMessage("Failed to save receipt photo")
             }
         }
     }
@@ -169,7 +182,7 @@ fun AddExpenseScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                if (uiState.expenseIconIrl.isNotEmpty()) {
+                if (uiState.expenseIconUrl.isNotEmpty()) {
                     AndroidView(
                         factory = { context ->
                             ImageView(context).apply {
@@ -179,7 +192,7 @@ fun AddExpenseScreen(
                         },
                         update = { imageView ->
                             try {
-                                imageView.setImageURI(Uri.parse(uiState.expenseIconIrl))
+                                imageView.setImageURI(Uri.parse(uiState.expenseIconUrl))
                             } catch (_: Exception) {
                                 imageView.setImageDrawable(null)
                             }
@@ -197,6 +210,35 @@ fun AddExpenseScreen(
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
+                    onClick = { receiptLauncher.launch("image/*") },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Select Receipt Photo")
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                if (uiState.receiptPhotoUrl.isNotEmpty()) {
+                    AndroidView(
+                        factory = { context ->
+                            ImageView(context).apply {
+                                layoutParams = android.view.ViewGroup.LayoutParams(200, 200)
+                                scaleType = ImageView.ScaleType.CENTER_CROP
+                            }
+                        },
+                        update = { imageView ->
+                            try {
+                                imageView.setImageURI(Uri.parse(uiState.receiptPhotoUrl))
+                            } catch (_: Exception) {
+                                imageView.setImageDrawable(null)
+                            }
+                        }
+                    )
+                }
 
                 if (uiState.message.isNotEmpty()) {
                     Text(uiState.message)

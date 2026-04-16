@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.menak.login.data.Dao.BudgetDao
 import com.menak.login.data.Dao.CategoryDao
 import com.menak.login.data.Dao.ExpenseDao
 import com.menak.login.data.Dao.UserDao
+import com.menak.login.data.Entity.BudgetGoalEntity
+import com.menak.login.data.Entity.CategoryBudgetLimitEntity
 import com.menak.login.data.Entity.CategoryEntity
 import com.menak.login.data.Entity.ExpenseEntity
 import com.menak.login.data.Entity.UserEntity
@@ -15,9 +18,11 @@ import com.menak.login.data.Entity.UserEntity
     entities = [
         UserEntity::class,
         CategoryEntity::class,
-        ExpenseEntity::class
+        ExpenseEntity::class,
+        BudgetGoalEntity::class,
+        CategoryBudgetLimitEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 
@@ -26,6 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun categoryDao(): CategoryDao
     abstract fun expenseDao(): ExpenseDao
+    abstract fun budgetDao(): BudgetDao
 
     companion object {
         @Volatile

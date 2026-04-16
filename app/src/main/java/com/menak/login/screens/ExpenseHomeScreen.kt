@@ -80,6 +80,31 @@ fun ExpenseHomeScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        Button(
+            onClick = { navController.navigate("budget_screen") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Budget Settings")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = { navController.navigate("expense_period_list") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("View Expenses By Period")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = { navController.navigate("category_totals") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("View Category Totals")
+        }
+
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {

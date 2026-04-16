@@ -7,7 +7,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.menak.login.ui.AddCategoryScreen
 import com.menak.login.ui.AddExpenseScreen
+import com.menak.login.ui.BudgetScreen
+import com.menak.login.ui.CategoryTotalsScreen
 import com.menak.login.ui.ExpenseHomeScreen
+import com.menak.login.ui.ExpensePeriodListScreen
 import com.menak.login.ui.ExpenseViewModel
 
 @Composable
@@ -36,6 +39,18 @@ fun AppNavGraph(
 
         composable("add_expense") {
             AddExpenseScreen(viewModel = viewModel)
+        }
+
+        composable("budget_screen") {
+            BudgetScreen(viewModel = viewModel)
+        }
+
+        composable("expense_period_list") {
+            ExpensePeriodListScreen(viewModel = viewModel)
+        }
+
+        composable("category_totals") {
+            CategoryTotalsScreen(viewModel = viewModel)
         }
     }
 }

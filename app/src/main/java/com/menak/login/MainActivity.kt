@@ -30,7 +30,8 @@ class MainActivity : ComponentActivity() {
 
         val expenseRepository = ExpenseRepository(
             categoryDao = database.categoryDao(),
-            expenseDao = database.expenseDao()
+            expenseDao = database.expenseDao(),
+            budgetDao = database.budgetDao()
         )
         val expenseFactory = ExpenseViewModelFactory(expenseRepository)
 

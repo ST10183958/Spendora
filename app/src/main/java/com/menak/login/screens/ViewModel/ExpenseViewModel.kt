@@ -5,12 +5,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.menak.login.data.Repository.ExpenseRepository
 import com.menak.login.screens.State.ExpenseUiState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.Job
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+
 class ExpenseViewModel(
     private val repository: ExpenseRepository
 ) : ViewModel() {
@@ -29,11 +33,62 @@ class ExpenseViewModel(
                 repository.getBudgetGoal(),
                 repository.getAllCategoryBudgetLimits()
             ) { categories, expenses, budgetGoal, categoryLimits ->
+
+                val monthFormatter = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+                val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+                val calendar = Calendar.getInstance()
+                val monthLabel = monthFormatter.format(calendar.time)
+
+                val startCalendar = calendar.clone() as Calendar
+                startCalendar.set(Calendar.DAY_OF_MONTH, 1)
+                val monthStart = dateFormatter.format(startCalendar.time)
+
+                val endCalendar = calendar.clone() as Calendar
+                endCalendar.set(Calendar.DAY_OF_MONTH, endCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+                val monthEnd = dateFormatter.format(endCalendar.time)
+
+                val monthExpenses = expenses.filter {
+                    it.startDate >= monthStart && it.startDate <= monthEnd
+                }
+
+                val monthlyBudget = budgetGoal?.monthlyTotalBudget ?: 0.0
+                val monthlySpent = monthExpenses.sumOf { it.amount }
+                val monthlyRemaining = monthlyBudget - monthlySpent
+
+                val dashboardCategoryItems = categories.map { category ->
+                    val spent = monthExpenses
+                        .filter { it.categoryId == category.id }
+                        .sumOf { it.amount }
+
+                    val limit = categoryLimits.firstOrNull { it.categoryId == category.id }?.monthlyLimit
+                    val remaining = limit?.minus(spent)
+
+                    val progress = when {
+                        limit != null && limit > 0.0 -> (spent / limit).toFloat().coerceIn(0f, 1f)
+                        monthlyBudget > 0.0 -> (spent / monthlyBudget).toFloat().coerceIn(0f, 1f)
+                        else -> 0f
+                    }
+
+                    CategoryDashboardItem(
+                        categoryId = category.id,
+                        categoryName = category.type,
+                        spentAmount = spent,
+                        remainingAmount = remaining,
+                        progress = progress
+                    )
+                }
+
                 _uiState.value.copy(
                     categories = categories,
                     expenses = expenses,
                     budgetGoal = budgetGoal,
-                    categoryBudgetLimits = categoryLimits
+                    categoryBudgetLimits = categoryLimits,
+                    currentMonthLabel = monthLabel,
+                    monthlyBudgetAmount = monthlyBudget,
+                    monthlySpentAmount = monthlySpent,
+                    monthlyRemainingAmount = monthlyRemaining,
+                    dashboardCategorySpending = dashboardCategoryItems
                 )
             }.collect { updatedState ->
                 _uiState.value = updatedState
@@ -131,8 +186,8 @@ class ExpenseViewModel(
         val startDate = _uiState.value.expenseStartDate.trim()
         val endDate = _uiState.value.expenseEndDate.trim()
         val description = _uiState.value.expenseDescription.trim()
-        val expenseIconUrl = _uiState.value.expenseIconUrl.trim()
-        val receiptPhotoUrl = _uiState.value.receiptPhotoUrl.trim()
+        val expenseIconUri = _uiState.value.expenseIconUrl.trim()
+        val receiptPhotoUri = _uiState.value.receiptPhotoUrl.trim()
 
         if (
             name.isEmpty() ||
@@ -141,7 +196,7 @@ class ExpenseViewModel(
             startDate.isEmpty() ||
             endDate.isEmpty() ||
             description.isEmpty() ||
-            expenseIconUrl.isEmpty()
+            expenseIconUri.isEmpty()
         ) {
             setMessage("Fill in all required expense fields correctly")
             return
@@ -155,8 +210,8 @@ class ExpenseViewModel(
                 startDate = startDate,
                 endDate = endDate,
                 description = description,
-                expenseIconUri = expenseIconUrl,
-                receiptPhotoUrl = receiptPhotoUrl
+                expenseIconUri = expenseIconUri,
+                receiptPhotoUrl = receiptPhotoUri
             )
 
             _uiState.value = _uiState.value.copy(

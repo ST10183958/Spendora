@@ -46,9 +46,10 @@ class MainActivity : ComponentActivity() {
                     val appNavController = rememberNavController()
 
                     AppNavGraph(
-                        navController = appNavController,
-                        viewModel = expenseViewModel,
-                        onLogout = { authViewModel.logout() }
+    navController = appNavController,
+    viewModel = expenseViewModel,
+    username = authUiState.loggedInUsername,
+    onLogout = { authViewModel.logout() }
                     )
                 } else {
                     val authNavController = rememberNavController()

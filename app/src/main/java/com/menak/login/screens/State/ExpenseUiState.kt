@@ -5,6 +5,7 @@ import com.menak.login.data.Entity.CategoryBudgetLimitEntity
 import com.menak.login.data.Entity.CategoryEntity
 import com.menak.login.data.Entity.CategorySpendingTotal
 import com.menak.login.data.Entity.ExpenseEntity
+import com.menak.login.ui.CategoryDashboardItem
 
 data class ExpenseUiState(
     val categoryType: String = "",
@@ -32,6 +33,12 @@ data class ExpenseUiState(
     val categoryTotals: List<CategorySpendingTotal> = emptyList(),
     val budgetGoal: BudgetGoalEntity? = null,
     val categoryBudgetLimits: List<CategoryBudgetLimitEntity> = emptyList(),
-
+    val currentMonthLabel: String = "",
+    val monthlyBudgetAmount: Double = 0.0,
+    val monthlySpentAmount: Double = 0.0,
+    val monthlyRemainingAmount: Double = 0.0,
+    val dashboardCategorySpending: List<CategoryDashboardItem> = emptyList(),
     val message: String = ""
+
+
 )

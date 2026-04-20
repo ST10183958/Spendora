@@ -11,7 +11,7 @@ import com.menak.login.data.AppDatabase
 import com.menak.login.data.Repository.AuthRepository
 import com.menak.login.data.Repository.ExpenseRepository
 import com.menak.login.navigation.AppNavGraph
-import com.menak.login.ui.AuthScreen
+import com.menak.login.navigation.AuthNavGraph
 import com.menak.login.ui.AuthViewModel
 import com.menak.login.ui.AuthViewModelFactory
 import com.menak.login.ui.ExpenseViewModel
@@ -43,17 +43,20 @@ class MainActivity : ComponentActivity() {
                 val authUiState by authViewModel.uiState.collectAsState()
 
                 if (authUiState.isLoggedIn) {
-                    val navController = rememberNavController()
+                    val appNavController = rememberNavController()
 
                     AppNavGraph(
-                        navController = navController,
+                        navController = appNavController,
                         viewModel = expenseViewModel,
-                        onLogout = {
-                            authViewModel.logout()
-                        }
+                        onLogout = { authViewModel.logout() }
                     )
                 } else {
-                    AuthScreen(viewModel = authViewModel)
+                    val authNavController = rememberNavController()
+
+                    AuthNavGraph(
+                        navController = authNavController,
+                        viewModel = authViewModel
+                    )
                 }
             }
         }

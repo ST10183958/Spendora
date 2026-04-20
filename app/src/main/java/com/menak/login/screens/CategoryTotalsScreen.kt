@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.menak.login.ui.components.DatePickerField
 
 @Composable
 fun CategoryTotalsScreen(
@@ -33,22 +34,18 @@ fun CategoryTotalsScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedTextField(
+        DatePickerField(
+            label = "From Date",
             value = uiState.periodFromDate,
-            onValueChange = viewModel::onPeriodFromDateChange,
-            label = { Text("From Date") },
-            placeholder = { Text("yyyy-MM-dd") },
-            modifier = Modifier.fillMaxWidth()
+            onDateSelected = viewModel::onPeriodFromDateChange
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
+        DatePickerField(
+            label = "To Date",
             value = uiState.periodToDate,
-            onValueChange = viewModel::onPeriodToDateChange,
-            label = { Text("To Date") },
-            placeholder = { Text("yyyy-MM-dd") },
-            modifier = Modifier.fillMaxWidth()
+            onDateSelected = viewModel::onPeriodToDateChange
         )
 
         Spacer(modifier = Modifier.height(12.dp))

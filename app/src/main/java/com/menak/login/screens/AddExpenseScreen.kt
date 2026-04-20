@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.menak.login.ui.components.DatePickerField
 import com.menak.login.util.copyImageToInternalStorage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -143,22 +144,18 @@ fun AddExpenseScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                OutlinedTextField(
+                DatePickerField(
+                    label = "Expense Start Date",
                     value = uiState.expenseStartDate,
-                    onValueChange = viewModel::onExpenseStartDateChange,
-                    label = { Text("Expense Start Date") },
-                    placeholder = { Text("e.g. 2026-04-15") },
-                    modifier = Modifier.fillMaxWidth()
+                    onDateSelected = viewModel::onExpenseStartDateChange
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                OutlinedTextField(
+                DatePickerField(
+                    label = "Expense End Date",
                     value = uiState.expenseEndDate,
-                    onValueChange = viewModel::onExpenseEndDateChange,
-                    label = { Text("Expense End Date") },
-                    placeholder = { Text("e.g. 2026-04-20") },
-                    modifier = Modifier.fillMaxWidth()
+                    onDateSelected = viewModel::onExpenseEndDateChange
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))

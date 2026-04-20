@@ -25,13 +25,29 @@ class AuthViewModel(
         _uiState.value = _uiState.value.copy(password = value)
     }
 
+    fun onConfirmPasswordChange(value: String) {
+        _uiState.value = _uiState.value.copy(confirmPassword = value)
+    }
+
+    fun clearMessage() {
+        _uiState.value = _uiState.value.copy(message = "")
+    }
+
     fun register() {
         val username = _uiState.value.username.trim()
         val password = _uiState.value.password.trim()
+        val confirmPassword = _uiState.value.confirmPassword.trim()
 
-        if (username.isEmpty() || password.isEmpty()) {
+        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             _uiState.value = _uiState.value.copy(
-                message = "Please enter username and password"
+                message = "Please fill in all fields"
+            )
+            return
+        }
+
+        if (password != confirmPassword) {
+            _uiState.value = _uiState.value.copy(
+                message = "Passwords do not match"
             )
             return
         }
@@ -41,7 +57,7 @@ class AuthViewModel(
             result.fold(
                 onSuccess = {
                     _uiState.value = _uiState.value.copy(
-                        message = "Account created successfully. You can now use the app.",
+                        message = "Account created successfully",
                         isLoggedIn = true,
                         loggedInUsername = username
                     )

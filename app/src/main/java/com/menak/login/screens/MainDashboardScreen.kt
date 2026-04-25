@@ -263,7 +263,7 @@ fun MainDashboardScreen(
 
             NavigationBarItem(
                 selected = false,
-                onClick = { navController.navigate("category_totals") },
+                onClick = { navController.navigate("analytics_screen") },
                 icon = { Icon(Icons.Default.Analytics, contentDescription = "Analytics") },
                 label = { Text("Analytics") }
             )

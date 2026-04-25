@@ -3,6 +3,8 @@ package com.menak.login.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.menak.login.data.Entity.CategoryEntity
+import com.menak.login.data.Entity.ExpenseEntity
 import com.menak.login.data.Repository.ExpenseRepository
 import com.menak.login.screens.State.ExpenseUiState
 import kotlinx.coroutines.Job
@@ -13,6 +15,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 class ExpenseViewModel(
@@ -21,6 +24,9 @@ class ExpenseViewModel(
 
     private val _uiState = MutableStateFlow(ExpenseUiState())
     val uiState: StateFlow<ExpenseUiState> = _uiState.asStateFlow()
+
+    private val _analyticsUiState = MutableStateFlow(AnalyticsUiState())
+    val analyticsUiState: StateFlow<AnalyticsUiState> = _analyticsUiState.asStateFlow()
 
     private var filteredExpensesJob: Job? = null
     private var categoryTotalsJob: Job? = null
@@ -45,23 +51,29 @@ class ExpenseViewModel(
                 val monthStart = dateFormatter.format(startCalendar.time)
 
                 val endCalendar = calendar.clone() as Calendar
-                endCalendar.set(Calendar.DAY_OF_MONTH, endCalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+                endCalendar.set(
+                    Calendar.DAY_OF_MONTH,
+                    endCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+                )
                 val monthEnd = dateFormatter.format(endCalendar.time)
 
-                val monthExpenses = expenses.filter {
-                    it.startDate >= monthStart && it.startDate <= monthEnd
+                val monthExpenses = expenses.filter { expense ->
+                    expense.startDate >= monthStart && expense.startDate <= monthEnd
                 }
 
                 val monthlyBudget = budgetGoal?.monthlyTotalBudget ?: 0.0
-                val monthlySpent = monthExpenses.sumOf { it.amount }
+                val monthlySpent = monthExpenses.sumOf { expense -> expense.amount }
                 val monthlyRemaining = monthlyBudget - monthlySpent
 
                 val dashboardCategoryItems = categories.map { category ->
                     val spent = monthExpenses
-                        .filter { it.categoryId == category.id }
-                        .sumOf { it.amount }
+                        .filter { expense -> expense.categoryId == category.id }
+                        .sumOf { expense -> expense.amount }
 
-                    val limit = categoryLimits.firstOrNull { it.categoryId == category.id }?.monthlyLimit
+                    val limit = categoryLimits.firstOrNull { limitItem ->
+                        limitItem.categoryId == category.id
+                    }?.monthlyLimit
+
                     val remaining = limit?.minus(spent)
 
                     val progress = when {
@@ -92,6 +104,17 @@ class ExpenseViewModel(
                 )
             }.collect { updatedState ->
                 _uiState.value = updatedState
+            }
+        }
+
+        viewModelScope.launch {
+            combine(
+                repository.getAllExpenses(),
+                repository.getAllCategories()
+            ) { expenses, categories ->
+                buildAnalyticsUiState(expenses, categories)
+            }.collect { analyticsState ->
+                _analyticsUiState.value = analyticsState
             }
         }
     }
@@ -295,6 +318,98 @@ class ExpenseViewModel(
                 _uiState.value = _uiState.value.copy(categoryTotals = totals)
             }
         }
+    }
+
+    private fun buildAnalyticsUiState(
+        expenses: List<ExpenseEntity>,
+        categories: List<CategoryEntity>
+    ): AnalyticsUiState {
+        val monthFormatter = SimpleDateFormat("yyyy-MM", Locale.getDefault())
+
+        val validExpenses = expenses.filter { expense ->
+            expense.startDate.isNotBlank()
+        }
+
+        val totalSpent = validExpenses.sumOf { expense ->
+            expense.amount
+        }
+
+        val groupedByDay = validExpenses
+            .groupBy { expense -> expense.startDate }
+            .mapValues { entry ->
+                entry.value.sumOf { expense -> expense.amount }
+            }
+            .toSortedMap()
+
+        val dailyAverage = if (groupedByDay.isNotEmpty()) {
+            totalSpent / groupedByDay.size
+        } else {
+            0.0
+        }
+
+        val categoryNameMap = categories.associateBy { category ->
+            category.id
+        }
+
+        val palette = listOf(
+            0xFF00C853,
+            0xFF2979FF,
+            0xFFFF4081,
+            0xFFFF5252,
+            0xFFAA00FF,
+            0xFFFF6D00,
+            0xFF651FFF,
+            0xFF00BFA5
+        )
+
+        val groupedByCategory = validExpenses.groupBy { expense ->
+            expense.categoryId
+        }
+
+        val categoryBreakdown = groupedByCategory.entries.toList()
+            .mapIndexed { index: Int, entry: Map.Entry<Int, List<ExpenseEntity>> ->
+                val categoryName = categoryNameMap[entry.key]?.type ?: "Unknown"
+
+                CategoryAnalyticsItem(
+                    name = categoryName,
+                    amount = entry.value.sumOf { expense -> expense.amount },
+                    color = palette[index % palette.size]
+                )
+            }
+            .sortedByDescending { item ->
+                item.amount
+            }
+
+        val dailySpending = groupedByDay.entries.map { entry ->
+            DailySpendingItem(
+                date = entry.key,
+                amount = entry.value
+            )
+        }
+
+        val currentMonth = monthFormatter.format(Date())
+
+        val previousMonthCalendar = Calendar.getInstance().apply {
+            add(Calendar.MONTH, -1)
+        }
+        val previousMonth = monthFormatter.format(previousMonthCalendar.time)
+
+        val thisMonthTotal = validExpenses
+            .filter { expense -> expense.startDate.startsWith(currentMonth) }
+            .sumOf { expense -> expense.amount }
+
+        val lastMonthTotal = validExpenses
+            .filter { expense -> expense.startDate.startsWith(previousMonth) }
+            .sumOf { expense -> expense.amount }
+
+        return AnalyticsUiState(
+            totalSpent = totalSpent,
+            dailyAverage = dailyAverage,
+            categoryBreakdown = categoryBreakdown,
+            dailySpending = dailySpending,
+            thisMonthTotal = thisMonthTotal,
+            lastMonthTotal = lastMonthTotal
+        )
     }
 }
 

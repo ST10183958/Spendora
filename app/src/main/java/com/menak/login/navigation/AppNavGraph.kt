@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.menak.login.ui.AddCategoryScreen
 import com.menak.login.ui.AddExpenseScreen
+import com.menak.login.ui.AnalyticsScreen
 import com.menak.login.ui.BudgetScreen
 import com.menak.login.ui.CategoryTotalsScreen
 import com.menak.login.ui.ExpensePeriodListScreen
@@ -35,27 +36,43 @@ fun AppNavGraph(
         }
 
         composable("add_category") {
-            AddCategoryScreen(viewModel = viewModel)
+            AddCategoryScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable("add_expense") {
             AddExpenseScreen(
                 viewModel = viewModel,
-                onBackClick = TODO(),
-                onAddNewCategoryClick = TODO()
+                onBackClick = { navController.popBackStack() },
+                onAddNewCategoryClick = { navController.navigate("add_category") }
             )
         }
 
         composable("budget_screen") {
-            BudgetScreen(viewModel = viewModel)
+            BudgetScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable("expense_period_list") {
-            ExpensePeriodListScreen(viewModel = viewModel)
+            ExpensePeriodListScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable("category_totals") {
             CategoryTotalsScreen(viewModel = viewModel)
+        }
+
+        composable("analytics_screen") {
+            AnalyticsScreen(
+                navController = navController,
+                viewModel = viewModel
+            )
         }
     }
 }

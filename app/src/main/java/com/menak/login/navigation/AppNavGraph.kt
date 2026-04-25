@@ -39,7 +39,11 @@ fun AppNavGraph(
         }
 
         composable("add_expense") {
-            AddExpenseScreen(viewModel = viewModel)
+            AddExpenseScreen(
+                viewModel = viewModel,
+                onBackClick = TODO(),
+                onAddNewCategoryClick = TODO()
+            )
         }
 
         composable("budget_screen") {

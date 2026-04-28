@@ -174,7 +174,7 @@ fun DashboardScaffold(
         }
     ) {
 
-        //Adam, E. 2026
+        //Adam, E. 2026.
         Scaffold(
             topBar = {
                 TopAppBar(

@@ -1,6 +1,7 @@
 
 package com.menak.login.navigation
 
+//Adam, E. 2026
 object Routes {
     const val DASHBOARD = "expense_home"
     const val CATEGORIES = "add_category"

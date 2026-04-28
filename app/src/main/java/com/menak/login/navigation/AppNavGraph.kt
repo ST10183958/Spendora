@@ -31,7 +31,8 @@ fun AppNavGraph(
             MainDashboardScreen(
                 username = username,
                 navController = navController,
-                viewModel = viewModel
+                viewModel = viewModel,
+                onLogout = onLogout
             )
         }
 

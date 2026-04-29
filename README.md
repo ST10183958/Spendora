@@ -12,7 +12,7 @@ Spendora is a modern Android expense tracking application built with **Kotlin**,
 - Njabulo Nxumalo - ST10442968 - Frontend
 - Sbusiso Nzimande - ST10184958 - Backend
 - Thivar Munien - ST10271490 - Frontend
-- Ahilya Surujpal - ST10285098 - Documentation
+- Ahilya Surujpal - ST10285098 - Documentation and Frontend
 
 ### Authentication
 - User registration with:

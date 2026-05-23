@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.menak.login.data.Entity.CategoryEntity
 import com.menak.login.data.Entity.ExpenseEntity
 import com.menak.login.data.Repository.ExpenseRepository
-import com.menak.login.screens.State.ExpenseUiState
+import com.menak.login.ui.ExpenseUiState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +17,8 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 class ExpenseViewModel(
     private val repository: ExpenseRepository
@@ -27,6 +29,9 @@ class ExpenseViewModel(
 
     private val _analyticsUiState = MutableStateFlow(AnalyticsUiState())
     val analyticsUiState: StateFlow<AnalyticsUiState> = _analyticsUiState.asStateFlow()
+
+    private val _uiEvent = MutableSharedFlow<UiEvent>()
+    val uiEvent = _uiEvent.asSharedFlow()
 
     private var filteredExpensesJob: Job? = null
     private var categoryTotalsJob: Job? = null
@@ -119,6 +124,16 @@ class ExpenseViewModel(
         }
     }
 
+    fun sendSnackbar(message: String) {
+
+        viewModelScope.launch {
+
+            _uiEvent.emit(
+                UiEvent.ShowSnackbar(message)
+            )
+        }
+    }
+
     fun onCategoryTypeChange(value: String) {
         _uiState.value = _uiState.value.copy(categoryType = value)
     }
@@ -128,23 +143,38 @@ class ExpenseViewModel(
     }
 
     fun onExpenseNameChange(value: String) {
-        _uiState.value = _uiState.value.copy(expenseName = value)
+        _uiState.value = _uiState.value.copy(
+            expenseName = value,
+            expenseNameError = null
+        )
     }
 
     fun onSelectedCategoryChange(categoryId: Int) {
-        _uiState.value = _uiState.value.copy(selectedCategoryId = categoryId)
+        _uiState.value = _uiState.value.copy(
+            selectedCategoryId = categoryId,
+            categoryError = null
+        )
     }
 
     fun onExpenseAmountChange(value: String) {
-        _uiState.value = _uiState.value.copy(expenseAmount = value)
+        _uiState.value = _uiState.value.copy(
+            expenseAmount = value,
+            amountError = null
+        )
     }
 
     fun onExpenseStartDateChange(value: String) {
-        _uiState.value = _uiState.value.copy(expenseStartDate = value)
+        _uiState.value = _uiState.value.copy(
+            expenseStartDate = value,
+            startDateError = null
+        )
     }
 
     fun onExpenseEndDateChange(value: String) {
-        _uiState.value = _uiState.value.copy(expenseEndDate = value)
+        _uiState.value = _uiState.value.copy(
+            expenseEndDate = value,
+            endDateError = null
+        )
     }
 
     fun onExpenseDescriptionChange(value: String) {
@@ -152,7 +182,10 @@ class ExpenseViewModel(
     }
 
     fun onExpenseIconUriChange(value: String) {
-        _uiState.value = _uiState.value.copy(expenseIconUrl = value)
+        _uiState.value = _uiState.value.copy(
+            expenseIconUrl = value,
+            iconError = null
+        )
     }
 
     fun onReceiptPhotoUriChange(value: String) {
@@ -203,51 +236,144 @@ class ExpenseViewModel(
     }
 
     fun addExpense() {
+
         val name = _uiState.value.expenseName.trim()
         val categoryId = _uiState.value.selectedCategoryId
-        val amount = _uiState.value.expenseAmount.toDoubleOrNull()
+        val amountText = _uiState.value.expenseAmount.trim()
+        val amount = amountText.toDoubleOrNull()
+
         val startDate = _uiState.value.expenseStartDate.trim()
         val endDate = _uiState.value.expenseEndDate.trim()
+
         val description = _uiState.value.expenseDescription.trim()
+
         val expenseIconUri = _uiState.value.expenseIconUrl.trim()
         val receiptPhotoUri = _uiState.value.receiptPhotoUrl.trim()
 
-        if (
-            name.isEmpty() ||
-            categoryId == null ||
-            amount == null ||
-            startDate.isEmpty() ||
-            endDate.isEmpty() ||
-            description.isEmpty() ||
-            expenseIconUri.isEmpty()
-        ) {
-            setMessage("Fill in all required expense fields correctly")
+        val expenseNameError =
+            if (name.isBlank())
+                "Expense name is required"
+            else null
+
+        val amountError =
+            when {
+                amountText.isBlank() ->
+                    "Amount is required"
+
+                amount == null ->
+                    "Enter a valid amount"
+
+                amount <= 0 ->
+                    "Amount must be greater than 0"
+
+                else -> null
+            }
+
+        val startDateError =
+            if (startDate.isBlank())
+                "Start date required"
+            else null
+
+        val endDateError =
+            if (endDate.isBlank())
+                "End date required"
+            else null
+
+        val categoryError =
+            if (categoryId == null)
+                "Select a category"
+            else null
+
+        val iconError =
+            if (expenseIconUri.isBlank())
+                "Expense icon required"
+            else null
+
+        _uiState.value = _uiState.value.copy(
+            expenseNameError = expenseNameError,
+            amountError = amountError,
+            startDateError = startDateError,
+            endDateError = endDateError,
+            categoryError = categoryError,
+            iconError = iconError
+        )
+
+        val hasErrors =
+            expenseNameError != null ||
+                    amountError != null ||
+                    startDateError != null ||
+                    endDateError != null ||
+                    categoryError != null ||
+                    iconError != null
+
+        if (hasErrors) {
+
+            viewModelScope.launch {
+                _uiEvent.emit(
+                    UiEvent.ShowSnackbar(
+                        "Please fix the highlighted fields"
+                    )
+                )
+            }
+
             return
         }
 
         viewModelScope.launch {
-            repository.addExpense(
-                name = name,
-                categoryId = categoryId,
-                amount = amount,
-                startDate = startDate,
-                endDate = endDate,
-                description = description,
-                expenseIconUri = expenseIconUri,
-                receiptPhotoUrl = receiptPhotoUri
-            )
 
-            _uiState.value = _uiState.value.copy(
-                expenseName = "",
-                selectedCategoryId = null,
-                expenseAmount = "",
-                expenseStartDate = "",
-                expenseEndDate = "",
-                expenseDescription = "",
-                expenseIconUrl = "",
-                receiptPhotoUrl = "",
-                message = "Expense added"
-            )
+            _uiState.value =
+                _uiState.value.copy(isLoading = true)
+
+            try {
+
+                repository.addExpense(
+                    name = name,
+                    categoryId = categoryId!!,
+                    amount = amount!!,
+                    startDate = startDate,
+                    endDate = endDate,
+                    description = description,
+                    expenseIconUri = expenseIconUri,
+                    receiptPhotoUrl = receiptPhotoUri
+                )
+
+                _uiState.value = _uiState.value.copy(
+                    expenseName = "",
+                    selectedCategoryId = null,
+                    expenseAmount = "",
+                    expenseStartDate = "",
+                    expenseEndDate = "",
+                    expenseDescription = "",
+                    expenseIconUrl = "",
+                    receiptPhotoUrl = "",
+
+                    expenseNameError = null,
+                    amountError = null,
+                    startDateError = null,
+                    endDateError = null,
+                    categoryError = null,
+                    iconError = null,
+
+                    isLoading = false
+                )
+
+                _uiEvent.emit(
+                    UiEvent.ShowSnackbar(
+                        "Expense added successfully"
+                    )
+                )
+
+            } catch (e: Exception) {
+
+                _uiState.value =
+                    _uiState.value.copy(isLoading = false)
+
+                _uiEvent.emit(
+                    UiEvent.ShowSnackbar(
+                        e.message ?: "Failed to add expense"
+                    )
+                )
+            }
         }
     }
 

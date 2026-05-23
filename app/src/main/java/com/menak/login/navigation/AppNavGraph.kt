@@ -10,7 +10,7 @@ import com.menak.login.ui.AddExpenseScreen
 import com.menak.login.ui.AnalyticsScreen
 import com.menak.login.ui.BudgetScreen
 import com.menak.login.ui.CategoryTotalsScreen
-import com.menak.login.ui.ExpensePeriodListScreen
+import com.menak.login.screens.ExpensePeriodListScreen
 import com.menak.login.ui.ExpenseViewModel
 import com.menak.login.ui.MainDashboardScreen
 

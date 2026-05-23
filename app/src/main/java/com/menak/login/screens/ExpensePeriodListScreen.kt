@@ -3,6 +3,7 @@ package com.menak.login.screens
 import android.net.Uri
 import android.widget.ImageView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,14 +32,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,7 +56,26 @@ fun ExpensePeriodListScreen(
     viewModel: ExpenseViewModel,
     onBackClick: () -> Unit
 ) {
+
     val uiState by viewModel.uiState.collectAsState()
+
+    var expanded by remember { mutableStateOf(false) }
+    var selectedCategory by remember { mutableStateOf("All") }
+
+    val displayedExpenses =
+        if (selectedCategory == "All") {
+            uiState.filteredExpenses
+        } else {
+            uiState.filteredExpenses.filter { expense ->
+
+                val category =
+                    uiState.categories.firstOrNull {
+                        it.id == expense.categoryId
+                    }
+
+                category?.type == selectedCategory
+            }
+        }
 
     Box(
         modifier = Modifier
@@ -62,25 +83,35 @@ fun ExpensePeriodListScreen(
             .background(Color(0xFFF8FBFB))
             .consumeWindowInsets(WindowInsets.safeDrawing)
     ) {
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp)
                 .background(
                     color = Color(0xFF00BFA5),
-                    shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
+                    shape = RoundedCornerShape(
+                        bottomStart = 32.dp,
+                        bottomEnd = 32.dp
+                    )
                 )
         )
 
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 32.dp),
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 32.dp
+                    ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 IconButton(onClick = onBackClick) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
@@ -92,6 +123,7 @@ fun ExpensePeriodListScreen(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Column {
+
                     Text(
                         text = "Expense History",
                         color = Color.White,
@@ -114,7 +146,10 @@ fun ExpensePeriodListScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 20.dp)
             ) {
+
                 Spacer(modifier = Modifier.height(28.dp))
+
+                // FILTER PERIOD CARD
 
                 HistoryInputCard(
                     title = "Filter Period",
@@ -126,6 +161,7 @@ fun ExpensePeriodListScreen(
                         )
                     }
                 ) {
+
                     DatePickerField(
                         label = "From Date",
                         value = uiState.periodFromDate,
@@ -143,18 +179,75 @@ fun ExpensePeriodListScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Button(
-                        onClick = { viewModel.loadExpensesForSelectedPeriod() },
+                        onClick = {
+                            viewModel.loadExpensesForSelectedPeriod()
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF00BFA5)
                         )
                     ) {
-                        Text("Load Expenses", color = Color.White)
+                        Text(
+                            text = "Load Expenses",
+                            color = Color.White
+                        )
+                    }
+                }
+
+                // CATEGORY FILTER CARD
+
+                HistoryInputCard(
+                    title = "Filter Category",
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Receipt,
+                            contentDescription = null,
+                            tint = Color(0xFF00897B)
+                        )
+                    }
+                ) {
+
+                    OutlinedButton(
+                        onClick = { expanded = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(selectedCategory)
+                    }
+
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = {
+                            expanded = false
+                        }
+                    ) {
+
+                        DropdownMenuItem(
+                            text = { Text("All") },
+                            onClick = {
+                                selectedCategory = "All"
+                                expanded = false
+                            }
+                        )
+
+                        uiState.categories.forEach { category ->
+
+                            DropdownMenuItem(
+                                text = {
+                                    Text(category.type)
+                                },
+                                onClick = {
+                                    selectedCategory = category.type
+                                    expanded = false
+                                }
+                            )
+                        }
                     }
                 }
 
                 if (uiState.message.isNotEmpty()) {
+
                     Spacer(modifier = Modifier.height(8.dp))
+
                     Text(
                         text = uiState.message,
                         color = MaterialTheme.colorScheme.primary
@@ -163,7 +256,8 @@ fun ExpensePeriodListScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                if (uiState.filteredExpenses.isEmpty()) {
+                if (displayedExpenses.isEmpty()) {
+
                     HistoryInputCard(
                         title = "No History Yet",
                         icon = {
@@ -174,15 +268,24 @@ fun ExpensePeriodListScreen(
                             )
                         }
                     ) {
+
                         Text(
                             text = "Select a period to view saved expenses.",
                             color = Color.Gray
                         )
                     }
+
                 } else {
-                    uiState.filteredExpenses.forEach { expense ->
-                        val category = uiState.categories.firstOrNull { it.id == expense.categoryId }
-                        val categoryName = category?.type ?: "Unknown"
+
+                    displayedExpenses.forEach { expense ->
+
+                        val category =
+                            uiState.categories.firstOrNull {
+                                it.id == expense.categoryId
+                            }
+
+                        val categoryName =
+                            category?.type ?: "Unknown"
 
                         HistoryExpenseCard(
                             expenseName = expense.expenseName,
@@ -208,21 +311,29 @@ private fun HistoryInputCard(
     icon: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp),
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        )
     ) {
+
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 icon()
+
                 Spacer(modifier = Modifier.width(8.dp))
+
                 Text(
                     text = title,
                     color = Color(0xFF00897B),
@@ -247,22 +358,35 @@ private fun HistoryExpenseCard(
     description: String,
     receiptPhotoUri: String
 ) {
+
+    var showReceipt by remember {
+        mutableStateOf(false)
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp),
         shape = RoundedCornerShape(14.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 3.dp
+        )
     ) {
+
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+
                     Text(
                         text = expenseName,
                         fontWeight = FontWeight.Bold,
@@ -291,13 +415,23 @@ private fun HistoryExpenseCard(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 Box(
                     modifier = Modifier
                         .size(8.dp)
-                        .background(Color(0xFF00BFA5), CircleShape)
+                        .background(
+                            Color(0xFF00BFA5),
+                            CircleShape
+                        )
                 )
+
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Start Date: $startDate", color = Color.DarkGray, fontSize = 13.sp)
+
+                Text(
+                    text = "Start Date: $startDate",
+                    color = Color.DarkGray,
+                    fontSize = 13.sp
+                )
             }
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -305,67 +439,140 @@ private fun HistoryExpenseCard(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 Box(
                     modifier = Modifier
                         .size(8.dp)
-                        .background(Color(0xFF2979FF), CircleShape)
+                        .background(
+                            Color(0xFF2979FF),
+                            CircleShape
+                        )
                 )
+
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("End Date: $endDate", color = Color.DarkGray, fontSize = 13.sp)
+
+                Text(
+                    text = "End Date: $endDate",
+                    color = Color.DarkGray,
+                    fontSize = 13.sp
+                )
             }
 
             if (description.isNotBlank()) {
+
                 Spacer(modifier = Modifier.height(10.dp))
+
                 Text(
                     text = "Description",
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF1A1A2E)
                 )
+
                 Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
                     text = description,
                     color = Color.Gray
                 )
             }
 
+// RECEIPT BUTTON + VIEW (UPDATED)
             if (receiptPhotoUri.isNotBlank()) {
+
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Receipt,
-                        contentDescription = null,
-                        tint = Color(0xFF00897B)
+                Button(
+                    onClick = {
+                        showReceipt = !showReceipt
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF00BFA5)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                ) {
                     Text(
-                        text = "Receipt",
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF00897B)
+                        text = if (showReceipt) "Hide Receipt" else "Show Receipt",
+                        color = Color.White
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                if (showReceipt) {
 
-                AndroidView(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
-                    factory = { context ->
-                        ImageView(context).apply {
-                            scaleType = ImageView.ScaleType.CENTER_CROP
-                        }
-                    },
-                    update = { imageView ->
-                        try {
-                            imageView.setImageURI(Uri.parse(receiptPhotoUri))
-                        } catch (_: Exception) {
-                            imageView.setImageDrawable(null)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Receipt Container (keeps it structured, not floating)
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+
+                        Column(
+                            modifier = Modifier.padding(12.dp)
+                        ) {
+
+                            // Header row with Close button
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+
+                                    Icon(
+                                        imageVector = Icons.Default.Receipt,
+                                        contentDescription = null,
+                                        tint = Color(0xFF00897B)
+                                    )
+
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    Text(
+                                        text = "Receipt",
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Color(0xFF00897B)
+                                    )
+                                }
+
+                                Text(
+                                    text = "Close",
+                                    color = Color(0xFF2979FF),
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .background(
+                                            Color(0x22000000),
+                                            RoundedCornerShape(6.dp)
+                                        )
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                        .clickable {
+                                            showReceipt = false
+                                        }
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            AndroidView(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(180.dp),
+                                factory = { context ->
+                                    ImageView(context).apply {
+                                        scaleType = ImageView.ScaleType.CENTER_CROP
+                                    }
+                                },
+                                update = { imageView ->
+                                    try {
+                                        imageView.setImageURI(Uri.parse(receiptPhotoUri))
+                                    } catch (_: Exception) {
+                                        imageView.setImageDrawable(null)
+                                    }
+                                }
+                            )
                         }
                     }
-                )
+                }
             }
         }
     }

@@ -62,6 +62,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.7.2")
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.core.ktx)
     ksp("androidx.room:room-compiler:2.7.2")
 
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
@@ -74,4 +75,10 @@ dependencies {
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("androidx.room:room-testing:2.7.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    androidTestImplementation ("androidx.arch.core:core-testing:2.2.0")
 }

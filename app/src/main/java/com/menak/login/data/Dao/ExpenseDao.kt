@@ -40,6 +40,6 @@ interface ExpenseDao {
     """)
     fun getCategoryTotalsBetweenDates(
         fromDate: String,
-        toDate: String
+        toDate: String,
     ): Flow<List<CategorySpendingTotal>>
 }

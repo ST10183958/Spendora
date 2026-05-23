@@ -476,7 +476,7 @@ private fun HistoryExpenseCard(
                 )
             }
 
-// RECEIPT BUTTON + VIEW (UPDATED)
+// RECEIPT BUTTON + VIEW (UPDATED) By Thivar
             if (receiptPhotoUri.isNotBlank()) {
 
                 Spacer(modifier = Modifier.height(12.dp))

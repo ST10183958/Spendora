@@ -275,6 +275,67 @@ fun AnalyticsScreen(
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+
+                        Text(
+                            text = "Spending Goals",
+                            fontSize = 16.sp,
+                            color = Color(0xFF1A1A2E)
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Minimum Goal", color = Color(0xFF00C853))
+                            Text("R %.2f".format(analytics.minGoal), color = Color(0xFF00C853))
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Maximum Limit", color = Color(0xFFFF5252))
+                            Text("R %.2f".format(analytics.maxGoal), color = Color(0xFFFF5252))
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        val progress =
+                            if (analytics.maxGoal > 0)
+                                (analytics.totalSpent / analytics.maxGoal).toFloat().coerceIn(0f, 1f)
+                            else 0f
+
+                        androidx.compose.material3.LinearProgressIndicator(
+                            progress = progress,
+                            modifier = Modifier.fillMaxWidth(),
+                            color = if (analytics.totalSpent <= analytics.minGoal)
+                                Color(0xFF00C853)
+                            else
+                                Color(0xFFFF5252)
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Current: R %.2f".format(analytics.totalSpent),
+                            color = Color.Gray,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
             }
         }
     }

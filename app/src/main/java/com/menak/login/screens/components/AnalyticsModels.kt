@@ -17,5 +17,7 @@ data class AnalyticsUiState(
     val categoryBreakdown: List<CategoryAnalyticsItem> = emptyList(),
     val dailySpending: List<DailySpendingItem> = emptyList(),
     val thisMonthTotal: Double = 0.0,
-    val lastMonthTotal: Double = 0.0
+    val lastMonthTotal: Double = 0.0,
+    val minGoal: Double = 0.0,
+    val maxGoal: Double = 0.0
 )

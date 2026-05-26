@@ -450,21 +450,16 @@ class ExpenseViewModel(
         expenses: List<ExpenseEntity>,
         categories: List<CategoryEntity>
     ): AnalyticsUiState {
+
         val monthFormatter = SimpleDateFormat("yyyy-MM", Locale.getDefault())
 
-        val validExpenses = expenses.filter { expense ->
-            expense.startDate.isNotBlank()
-        }
+        val validExpenses = expenses.filter { it.startDate.isNotBlank() }
 
-        val totalSpent = validExpenses.sumOf { expense ->
-            expense.amount
-        }
+        val totalSpent = validExpenses.sumOf { it.amount }
 
         val groupedByDay = validExpenses
-            .groupBy { expense -> expense.startDate }
-            .mapValues { entry ->
-                entry.value.sumOf { expense -> expense.amount }
-            }
+            .groupBy { it.startDate }
+            .mapValues { entry -> entry.value.sumOf { it.amount } }
             .toSortedMap()
 
         val dailyAverage = if (groupedByDay.isNotEmpty()) {
@@ -473,9 +468,7 @@ class ExpenseViewModel(
             0.0
         }
 
-        val categoryNameMap = categories.associateBy { category ->
-            category.id
-        }
+        val categoryMap = categories.associateBy { it.id }
 
         val palette = listOf(
             0xFF00C853,
@@ -488,45 +481,42 @@ class ExpenseViewModel(
             0xFF00BFA5
         )
 
-        val groupedByCategory = validExpenses.groupBy { expense ->
-            expense.categoryId
-        }
+        val groupedByCategory = validExpenses.groupBy { it.categoryId }
 
         val categoryBreakdown = groupedByCategory.entries.toList()
-            .mapIndexed { index: Int, entry: Map.Entry<Int, List<ExpenseEntity>> ->
-                val categoryName = categoryNameMap[entry.key]?.type ?: "Unknown"
+            .mapIndexed { index, entry ->
+                val categoryName = categoryMap[entry.key]?.type ?: "Unknown"
 
                 CategoryAnalyticsItem(
                     name = categoryName,
-                    amount = entry.value.sumOf { expense -> expense.amount },
+                    amount = entry.value.sumOf { it.amount },
                     color = palette[index % palette.size]
                 )
             }
-            .sortedByDescending { item ->
-                item.amount
-            }
+            .sortedByDescending { it.amount }
 
-        val dailySpending = groupedByDay.entries.map { entry ->
-            DailySpendingItem(
-                date = entry.key,
-                amount = entry.value
-            )
+        val dailySpending = groupedByDay.map { (date, amount) ->
+            DailySpendingItem(date, amount)
         }
 
-        val currentMonth = monthFormatter.format(Date())
+        val currentMonth = monthFormatter.format(java.util.Date())
 
-        val previousMonthCalendar = Calendar.getInstance().apply {
+        val prevMonthCalendar = Calendar.getInstance().apply {
             add(Calendar.MONTH, -1)
         }
-        val previousMonth = monthFormatter.format(previousMonthCalendar.time)
+        val previousMonth = monthFormatter.format(prevMonthCalendar.time)
 
         val thisMonthTotal = validExpenses
-            .filter { expense -> expense.startDate.startsWith(currentMonth) }
-            .sumOf { expense -> expense.amount }
+            .filter { it.startDate.startsWith(currentMonth) }
+            .sumOf { it.amount }
 
         val lastMonthTotal = validExpenses
-            .filter { expense -> expense.startDate.startsWith(previousMonth) }
-            .sumOf { expense -> expense.amount }
+            .filter { it.startDate.startsWith(previousMonth) }
+            .sumOf { it.amount }
+
+        // NEW GOALS
+        val minGoal = totalSpent * 0.7
+        val maxGoal = totalSpent * 1.2
 
         return AnalyticsUiState(
             totalSpent = totalSpent,
@@ -534,7 +524,10 @@ class ExpenseViewModel(
             categoryBreakdown = categoryBreakdown,
             dailySpending = dailySpending,
             thisMonthTotal = thisMonthTotal,
-            lastMonthTotal = lastMonthTotal
+            lastMonthTotal = lastMonthTotal,
+
+            minGoal = minGoal,
+            maxGoal = maxGoal
         )
     }
 }

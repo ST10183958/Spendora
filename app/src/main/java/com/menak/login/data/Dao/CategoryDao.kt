@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 interface CategoryDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCategory(category: CategoryEntity)
+    fun insertCategory(category: CategoryEntity)
 
     @Query("SELECT * FROM categories ORDER BY type ASC")
     fun getAllCategories(): Flow<List<CategoryEntity>>

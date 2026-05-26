@@ -1,13 +1,21 @@
-package com.menak.login.screens.State
+package com.menak.login.ui
 
 import com.menak.login.data.Entity.BudgetGoalEntity
 import com.menak.login.data.Entity.CategoryBudgetLimitEntity
 import com.menak.login.data.Entity.CategoryEntity
 import com.menak.login.data.Entity.CategorySpendingTotal
 import com.menak.login.data.Entity.ExpenseEntity
-import com.menak.login.ui.CategoryDashboardItem
 
 data class ExpenseUiState(
+    val expenseNameError: String? = null,
+    val amountError: String? = null,
+    val startDateError: String? = null,
+    val endDateError: String? = null,
+    val categoryError: String? = null,
+    val iconError: String? = null,
+
+    val isLoading: Boolean = false,
+
     val categoryType: String = "",
     val categoryIconUri: String = "",
 

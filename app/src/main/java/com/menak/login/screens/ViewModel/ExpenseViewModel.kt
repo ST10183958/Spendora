@@ -451,72 +451,62 @@ class ExpenseViewModel(
         categories: List<CategoryEntity>
     ): AnalyticsUiState {
 
-        val monthFormatter = SimpleDateFormat("yyyy-MM", Locale.getDefault())
-
         val validExpenses = expenses.filter { it.startDate.isNotBlank() }
 
         val totalSpent = validExpenses.sumOf { it.amount }
 
         val groupedByDay = validExpenses
             .groupBy { it.startDate }
-            .mapValues { entry -> entry.value.sumOf { it.amount } }
+            .mapValues { it.value.sumOf { e -> e.amount } }
             .toSortedMap()
 
-        val dailyAverage = if (groupedByDay.isNotEmpty()) {
-            totalSpent / groupedByDay.size
-        } else {
-            0.0
-        }
+        val daysCount = groupedByDay.size.coerceAtLeast(1)
+
+        val dailyAverage = totalSpent / daysCount
 
         val categoryMap = categories.associateBy { it.id }
 
         val palette = listOf(
-            0xFF00C853,
-            0xFF2979FF,
-            0xFFFF4081,
-            0xFFFF5252,
-            0xFFAA00FF,
-            0xFFFF6D00,
-            0xFF651FFF,
-            0xFF00BFA5
+            0xFF00C853, 0xFF2979FF, 0xFFFF4081, 0xFFFF5252,
+            0xFFAA00FF, 0xFFFF6D00, 0xFF651FFF, 0xFF00BFA5
         )
 
-        val groupedByCategory = validExpenses.groupBy { it.categoryId }
-
-        val categoryBreakdown = groupedByCategory.entries.toList()
+        val categoryBreakdown = validExpenses
+            .groupBy { it.categoryId }
+            .entries
             .mapIndexed { index, entry ->
-                val categoryName = categoryMap[entry.key]?.type ?: "Unknown"
-
+                val name = categoryMap[entry.key]?.type ?: "Unknown"
                 CategoryAnalyticsItem(
-                    name = categoryName,
+                    name = name,
                     amount = entry.value.sumOf { it.amount },
                     color = palette[index % palette.size]
                 )
             }
-            .sortedByDescending { it.amount }
 
-        val dailySpending = groupedByDay.map { (date, amount) ->
-            DailySpendingItem(date, amount)
+        val dailySpending = groupedByDay.map {
+            DailySpendingItem(it.key, it.value)
         }
 
-        val currentMonth = monthFormatter.format(java.util.Date())
+        val currentMonth =
+            java.text.SimpleDateFormat("yyyy-MM", java.util.Locale.getDefault())
+                .format(java.util.Date())
 
-        val prevMonthCalendar = Calendar.getInstance().apply {
-            add(Calendar.MONTH, -1)
-        }
-        val previousMonth = monthFormatter.format(prevMonthCalendar.time)
-
-        val thisMonthTotal = validExpenses
+        val thisMonthExpenses = validExpenses
             .filter { it.startDate.startsWith(currentMonth) }
-            .sumOf { it.amount }
 
-        val lastMonthTotal = validExpenses
-            .filter { it.startDate.startsWith(previousMonth) }
-            .sumOf { it.amount }
+        val thisMonthTotal = thisMonthExpenses.sumOf { it.amount }
 
-        // NEW GOALS
         val minGoal = totalSpent * 0.7
         val maxGoal = totalSpent * 1.2
+
+        val goalScore = if (maxGoal > 0) {
+            ((totalSpent / maxGoal) * 100).coerceAtMost(100.0)
+        } else 0.0
+
+        val goalHistory = listOf(
+            GoalHistoryItem("Prev", (thisMonthTotal * 0.9 / maxGoal) * 100),
+            GoalHistoryItem("This", goalScore)
+        )
 
         return AnalyticsUiState(
             totalSpent = totalSpent,
@@ -524,10 +514,11 @@ class ExpenseViewModel(
             categoryBreakdown = categoryBreakdown,
             dailySpending = dailySpending,
             thisMonthTotal = thisMonthTotal,
-            lastMonthTotal = lastMonthTotal,
-
+            lastMonthTotal = 0.0,
             minGoal = minGoal,
-            maxGoal = maxGoal
+            maxGoal = maxGoal,
+
+            goalHistory = goalHistory
         )
     }
 }

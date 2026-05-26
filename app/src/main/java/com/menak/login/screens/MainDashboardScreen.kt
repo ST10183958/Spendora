@@ -52,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -372,6 +373,65 @@ fun MainDashboardScreen(
                                     "Remaining: R %.2f".format(max(uiState.monthlyRemainingAmount, 0.0)),
                                     color = Color(0xFF00A896)
                                 )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    val analytics by viewModel.analyticsUiState.collectAsState()
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(4.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+
+                            Text(
+                                text = "Goal Performance Over Time",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1A1A2E)
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // FIXED SAFE LIST ITERATION
+                            analytics.goalHistory.forEach { item ->
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = item.month,
+                                        color = Color.DarkGray
+                                    )
+
+                                    Text(
+                                        text = "${item.score.toInt()}%",
+                                        color = if (item.score >= 70)
+                                            Color(0xFF00C853)
+                                        else
+                                            Color(0xFFFF5252)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(6.dp))
+
+                                LinearProgressIndicator(
+                                    progress = ((item.score / 100.0).toFloat()).coerceIn(0f, 1f),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = if (item.score >= 70.0)
+                                        Color(0xFF00C853)
+                                    else
+                                        Color(0xFFFF5252)
+                                )
+
+                                Spacer(modifier = Modifier.height(10.dp))
                             }
                         }
                     }

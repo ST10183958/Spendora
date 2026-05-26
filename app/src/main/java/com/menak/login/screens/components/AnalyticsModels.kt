@@ -19,5 +19,9 @@ data class AnalyticsUiState(
     val thisMonthTotal: Double = 0.0,
     val lastMonthTotal: Double = 0.0,
     val minGoal: Double = 0.0,
-    val maxGoal: Double = 0.0
+    val maxGoal: Double = 0.0,
+    val daysWithinGoalPercent: Double = 0.0,
+    val daysOverGoalPercent: Double = 0.0,
+    val goalScore: Double = 0.0,
+    val goalHistory: List<GoalHistoryItem> = emptyList()
 )

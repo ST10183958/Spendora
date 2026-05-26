@@ -23,6 +23,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -334,6 +336,62 @@ fun AnalyticsScreen(
                             color = Color.Gray,
                             fontSize = 13.sp
                         )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(4.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+
+                                Text(
+                                    text = "Goal Performance (Monthly)",
+                                    fontSize = 16.sp,
+                                    color = Color(0xFF1A1A2E)
+                                )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                // Score
+                                Text(
+                                    text = "Score: %.0f%%".format(analytics.goalScore),
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (analytics.goalScore >= 70) Color(0xFF00C853) else Color(0xFFFF5252)
+                                )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                // Progress bar
+                                LinearProgressIndicator(
+                                    progress = (analytics.goalScore / 100).toFloat(),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = if (analytics.goalScore >= 70) Color(0xFF00C853) else Color(0xFFFF5252)
+                                )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        "Within Goal: %.0f%%".format(analytics.daysWithinGoalPercent),
+                                        color = Color(0xFF00C853)
+                                    )
+
+                                    Text(
+                                        "Over Goal: %.0f%%".format(analytics.daysOverGoalPercent),
+                                        color = Color(0xFFFF5252)
+                                    )
+                                }
+                            }
+                        }
+
                     }
                 }
             }

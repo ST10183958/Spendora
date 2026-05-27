@@ -41,6 +41,7 @@ fun DashboardScaffold(
         Routes.HISTORY,
         Routes.ANALYTICS,
         Routes.BUDGET,
+        Routes.SETTINGS,
         Routes.CATEGORY_TOTALS
     )
 
@@ -57,7 +58,9 @@ fun DashboardScaffold(
         Routes.HISTORY -> "Expense History"
         Routes.ANALYTICS -> "Analytics"
         Routes.BUDGET -> "Budget Settings"
+        Routes.SETTINGS -> "Settings"
         Routes.CATEGORY_TOTALS -> "Category Totals"
+
         else -> "Spendora"
     }
 
@@ -150,6 +153,16 @@ fun DashboardScaffold(
                     onClick = {
                         scope.launch { drawerState.close() }
                         navController.navigate(Routes.BUDGET) { launchSingleTop = true }
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("Settings") },
+                    selected = currentRoute == Routes.SETTINGS,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate(Routes.SETTINGS) { launchSingleTop = true }
                     },
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )

@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.menak.login.R
+import com.menak.login.navigation.Routes
 import kotlinx.coroutines.launch
 import kotlin.math.max
 
@@ -69,6 +70,8 @@ object DashboardRoutes {
     const val HISTORY = "expense_period_list"
     const val ANALYTICS = "analytics_screen"
     const val BUDGET = "budget_screen"
+
+    const val SETTINGS = "settings_screen"
 
     const val CATEGORY_TOTALS = "category_totals"
 }
@@ -172,6 +175,16 @@ fun MainDashboardScreen(
                     onClick = {
                         scope.launch { drawerState.close() }
                         navController.navigate(DashboardRoutes.BUDGET)
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("Settings") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate(DashboardRoutes.SETTINGS)
                     },
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )

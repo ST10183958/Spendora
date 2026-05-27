@@ -44,6 +44,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -58,8 +59,12 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation("androidx.compose.material:material-icons-extended")
 
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+
     implementation("androidx.room:room-runtime:2.7.2")
     implementation("androidx.room:room-ktx:2.7.2")
+    implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     ksp("androidx.room:room-compiler:2.7.2")
 

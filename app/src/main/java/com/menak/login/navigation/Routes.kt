@@ -11,7 +11,7 @@ object Routes {
     const val BUDGET = "budget_screen"
     const val CATEGORY_TOTALS = "category_totals"
 
-    const val SETTINGS = "settings"
+    const val SETTINGS = "settings_screen"
 }
 
 //Title: Sandbox

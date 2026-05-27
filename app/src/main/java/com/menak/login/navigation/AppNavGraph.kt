@@ -5,6 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.menak.login.screens.SettingsScreen
+import com.menak.login.screens.ViewModel.SettingsViewModel
 import com.menak.login.ui.AddCategoryScreen
 import com.menak.login.ui.AddExpenseScreen
 import com.menak.login.ui.AnalyticsScreen
@@ -18,6 +20,7 @@ import com.menak.login.ui.MainDashboardScreen
 fun AppNavGraph(
     navController: NavHostController,
     viewModel: ExpenseViewModel,
+    settingsVM: SettingsViewModel,
     username: String,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
@@ -76,9 +79,11 @@ fun AppNavGraph(
             )
         }
 
-        composable(route="settings")
-        {
-
+        composable("settings_screen") {
+            SettingsScreen(
+                navController = navController,
+                settingsVM = settingsVM
+            )
         }
     }
 }

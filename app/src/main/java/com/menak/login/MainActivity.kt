@@ -12,6 +12,7 @@ import com.menak.login.data.Repository.AuthRepository
 import com.menak.login.data.Repository.ExpenseRepository
 import com.menak.login.navigation.AppNavGraph
 import com.menak.login.navigation.AuthNavGraph
+import com.menak.login.screens.ViewModel.SettingsViewModel
 import com.menak.login.ui.AuthViewModel
 import com.menak.login.ui.AuthViewModelFactory
 import com.menak.login.ui.ExpenseViewModel
@@ -35,21 +36,32 @@ class MainActivity : ComponentActivity() {
         )
         val expenseFactory = ExpenseViewModelFactory(expenseRepository)
 
-        setContent {
-            LoginTheme {
+
+
+        setContent  {
+
                 val authViewModel: AuthViewModel = viewModel(factory = authFactory)
                 val expenseViewModel: ExpenseViewModel = viewModel(factory = expenseFactory)
 
                 val authUiState by authViewModel.uiState.collectAsState()
 
+                val settingsVm: SettingsViewModel = viewModel()
+                val darkMode by settingsVm.darkMode.collectAsState()
+
+
+
+            LoginTheme ( darkTheme = darkMode
+            ) {
+
                 if (authUiState.isLoggedIn) {
                     val appNavController = rememberNavController()
 
                     AppNavGraph(
-    navController = appNavController,
-    viewModel = expenseViewModel,
-    username = authUiState.loggedInUsername,
-    onLogout = { authViewModel.logout() }
+                        navController = appNavController,
+                        viewModel = expenseViewModel,
+                        settingsVM = settingsVm,
+                        username = authUiState.loggedInUsername,
+                        onLogout = { authViewModel.logout() }
                     )
                 } else {
                     val authNavController = rememberNavController()

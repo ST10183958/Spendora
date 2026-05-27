@@ -10,6 +10,8 @@ object Routes {
     const val ANALYTICS = "analytics_screen"
     const val BUDGET = "budget_screen"
     const val CATEGORY_TOTALS = "category_totals"
+
+    const val SETTINGS = "settings"
 }
 
 //Title: Sandbox

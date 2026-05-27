@@ -75,5 +75,10 @@ fun AppNavGraph(
                 viewModel = viewModel
             )
         }
+
+        composable(route="settings")
+        {
+
+        }
     }
 }

@@ -20,6 +20,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            isDebuggable = true
+            isMinifyEnabled = false
+        }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -70,6 +75,21 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+
+    // Room testing
+    androidTestImplementation ("androidx.room:room-testing:2.7.2")
+
+    // Coroutines testing
+    androidTestImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+
+    // AndroidX Test
+    androidTestImplementation ("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation ("androidx.test:runner:1.5.2")
+    androidTestImplementation ("androidx.test:core:1.5.0")
+
+    // Assertions
+    testImplementation ("junit:junit:4.13.2")
+    androidTestImplementation ("com.google.truth:truth:1.1.5")
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

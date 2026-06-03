@@ -121,6 +121,15 @@ fun MainDashboardScreen(
                 )
 
                 Spacer(Modifier.height(20.dp))
+                NavigationDrawerItem(
+                    label = { Text("Help") },
+                    selected = false,
+                    onClick = {
+                        navController.navigate("help_screen")
+                        scope.launch { drawerState.close() }
+                    }
+                )
+                Spacer(Modifier.height(20.dp))
 
                 NavigationDrawerItem(
                     label = { Text("Logout") },

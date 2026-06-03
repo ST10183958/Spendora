@@ -9,6 +9,7 @@ import com.menak.login.ui.AddCategoryScreen
 import com.menak.login.ui.AddExpenseScreen
 import com.menak.login.ui.AnalyticsScreen
 import com.menak.login.ui.BudgetScreen
+import com.menak.login.screens.HelpScreen
 import com.menak.login.ui.CategoryTotalsScreen
 import com.menak.login.screens.ExpensePeriodListScreen
 import com.menak.login.ui.ExpenseViewModel
@@ -54,14 +55,15 @@ fun AppNavGraph(
         composable("budget_screen") {
             BudgetScreen(
                 viewModel = viewModel,
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+
             )
         }
 
         composable("expense_period_list") {
             ExpensePeriodListScreen(
                 viewModel = viewModel,
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
             )
         }
 
@@ -73,6 +75,11 @@ fun AppNavGraph(
             AnalyticsScreen(
                 navController = navController,
                 viewModel = viewModel
+            )
+        }
+        composable("help_screen") {
+            HelpScreen(
+                navController = navController,
             )
         }
     }

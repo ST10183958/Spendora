@@ -41,7 +41,8 @@ fun DashboardScaffold(
         Routes.HISTORY,
         Routes.ANALYTICS,
         Routes.BUDGET,
-        Routes.CATEGORY_TOTALS
+        Routes.HELP,
+        Routes.CATEGORY_TOTALS,
     )
 
     //Adam, E. 2026
@@ -57,6 +58,7 @@ fun DashboardScaffold(
         Routes.HISTORY -> "Expense History"
         Routes.ANALYTICS -> "Analytics"
         Routes.BUDGET -> "Budget Settings"
+        Routes.HELP -> "Help"
         Routes.CATEGORY_TOTALS -> "Category Totals"
         else -> "Spendora"
     }
@@ -169,6 +171,16 @@ fun DashboardScaffold(
                         unselectedContainerColor = MaterialTheme.colorScheme.errorContainer,
                         unselectedTextColor = MaterialTheme.colorScheme.error
                     )
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("Help") },
+                    selected = currentRoute == Routes.HELP,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate(Routes.HELP) { launchSingleTop = true }
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
                 )
             }
         }

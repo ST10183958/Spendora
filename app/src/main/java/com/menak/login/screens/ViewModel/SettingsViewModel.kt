@@ -3,7 +3,7 @@ package com.menak.login.screens.ViewModel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.menak.login.data.UserPreferencesRepository
+import com.menak.login.data.Repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

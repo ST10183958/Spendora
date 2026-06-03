@@ -1,13 +1,13 @@
-package com.menak.login.data
+package com.menak.login.data.Repository
 
 import android.content.Context
-import androidx.constraintlayout.motion.widget.Key
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.flow.Flow
 import java.io.IOException
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.emptyPreferences
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
@@ -22,7 +22,7 @@ class UserPreferencesRepository(private val context: Context) {
     val darkModeFlow: Flow<Boolean> =
         context.dataStore.data
             .catch { e ->
-                if (e is IOException) emit(androidx.datastore.preferences.core.emptyPreferences())
+                if (e is IOException) emit(emptyPreferences())
                 else throw e
             }
             .map { prefs ->

@@ -31,16 +31,19 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.menak.login.ui.components.DatePickerField
 import com.menak.login.util.copyImageToInternalStorage
+import com.menak.login.screens.ViewModel.CurrencyViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddExpenseScreen(
     viewModel: ExpenseViewModel,
     onBackClick: () -> Unit,
-    onAddNewCategoryClick: () -> Unit
+    onAddNewCategoryClick: () -> Unit,
+    currencyVM: CurrencyViewModel
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
+    val currency = currencyVM.currency.value
 
     var categoryExpanded by remember {
         mutableStateOf(false)
@@ -289,7 +292,7 @@ fun AddExpenseScreen(
                             },
 
                             placeholder = {
-                                Text("$ 0.00")
+                                Text("${currency.symbol} 0.00")
                             },
 
                             modifier = Modifier.fillMaxWidth(),

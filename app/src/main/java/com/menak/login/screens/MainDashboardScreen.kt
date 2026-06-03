@@ -1,3 +1,4 @@
+
 package com.menak.login.ui
 
 import androidx.compose.foundation.Image
@@ -22,9 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.menak.login.R
+import com.menak.login.screens.ViewModel.CurrencyViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.max
-import com.menak.login.navigation.Routes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,18 +33,22 @@ fun MainDashboardScreen(
     username: String,
     navController: NavController,
     viewModel: ExpenseViewModel,
+    currencyVM: CurrencyViewModel,
     onLogout: () -> Unit
 ) {
 
-    val uiState by viewModel.uiState.collectAsState()
+    // ---------------- STATE FIX ----------------
+    val uiState = viewModel.uiState.collectAsState().value
+    val currency = currencyVM.currency.value
+
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    fun safeProgress(spent: Double, budget: Double): Float {
-        if (budget <= 0.0) return 0f
-        return (spent / budget).toFloat().coerceIn(0f, 1f)
+    fun formatMoney(amount: Double): String {
+        return "${currency.symbol} %.2f".format(amount)
     }
 
+    // ---------------- CATEGORY CALCULATION ----------------
     val categorySpending = remember(uiState.expenses, uiState.categories) {
 
         uiState.categories.map { category ->
@@ -52,17 +57,16 @@ fun MainDashboardScreen(
                 .filter { it.categoryId == category.id }
                 .sumOf { it.amount }
 
-            val remaining = max(0.0, 0.0 - spent) // (no budget table yet, so 0 baseline)
+            val remaining = max(0.0, 0.0 - spent)
 
             CategorySpendingDashboardItem(
                 categoryName = category.type,
                 spentAmount = spent,
                 remainingAmount = remaining,
-                progress = 0f // optional later when budget is wired
+                progress = 0f
             )
         }
     }
-
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -121,6 +125,15 @@ fun MainDashboardScreen(
                     }
                 )
 
+                NavigationDrawerItem(
+                    label = { Text("Settings") },
+                    selected = false,
+                    onClick = {
+                        navController.navigate("settings_screen")
+                        scope.launch { drawerState.close() }
+                    }
+                )
+
                 Spacer(Modifier.height(20.dp))
                 NavigationDrawerItem(
                     label = { Text("Help") },
@@ -132,16 +145,14 @@ fun MainDashboardScreen(
                 )
                 Spacer(Modifier.height(20.dp))
                 NavigationDrawerItem(
-                    label = { Text("Settings") },
+                    label = { Text("Currency Settings") },
                     selected = false,
                     onClick = {
+                        navController.navigate("currency_settings")
                         scope.launch { drawerState.close() }
-                        navController.navigate("settings_screen")
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    }
                 )
                 Spacer(Modifier.height(20.dp))
-
 
                 NavigationDrawerItem(
                     label = { Text("Logout") },
@@ -160,11 +171,7 @@ fun MainDashboardScreen(
                         IconButton(onClick = {
                             scope.launch { drawerState.open() }
                         }) {
-                            Icon(
-                                Icons.Default.Menu,
-                                contentDescription = null,
-                                tint = Color.White
-                            )
+                            Icon(Icons.Default.Menu, contentDescription = null)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -218,39 +225,79 @@ fun MainDashboardScreen(
                         Spacer(Modifier.height(10.dp))
 
                         Text("Welcome, $username", color = Color.White)
-                        Text(
-                            "Budget Overview",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
+                        Text("Budget Overview", color = Color.White)
                     }
                 }
 
+                Column(Modifier.padding(16.dp)) {
 
-                Text(
-                    "Category Spending",
-                    modifier = Modifier.padding(16.dp),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(6.dp)
+                    ) {
 
-                categorySpending.forEach { item ->
-                    CategorySpendingDashboardCard(
-                        title = item.categoryName,
-                        spentAmount = item.spentAmount,
-                        remainingAmount = item.remainingAmount,
-                        progress = item.progress
-                    )
+                        Column(Modifier.padding(16.dp)) {
+
+                            Text("Monthly Budget")
+
+                            Text(
+                                formatMoney(uiState.monthlyBudgetAmount),
+                                fontSize = 18.sp
+                            )
+
+                            Spacer(Modifier.height(10.dp))
+
+                            LinearProgressIndicator(
+                                progress = {
+                                    if (uiState.monthlyBudgetAmount > 0)
+                                        (uiState.monthlySpentAmount / uiState.monthlyBudgetAmount)
+                                            .toFloat()
+                                            .coerceIn(0f, 1f)
+                                    else 0f
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Spacer(Modifier.height(10.dp))
+
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    "Spent: ${formatMoney(uiState.monthlySpentAmount)}",
+                                    color = Color.Red
+                                )
+
+                                Text(
+                                    "Remaining: ${formatMoney(max(uiState.monthlyRemainingAmount, 0.0))}",
+                                    color = Color(0xFF00A896)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.height(20.dp))
+
+                    Text("Category Spending")
+
+                    categorySpending.forEach { item ->
+
+                        CategorySpendingDashboardCard(
+                            title = item.categoryName,
+                            spentAmount = item.spentAmount,
+                            remainingAmount = item.remainingAmount,
+                            progress = item.progress,
+                            currencySymbol = currency.symbol
+                        )
+                    }
                 }
-
-                Spacer(Modifier.height(80.dp))
             }
         }
     }
 }
 
-
+// ---------------- DATA MODEL ----------------
 data class CategorySpendingDashboardItem(
     val categoryName: String,
     val spentAmount: Double,
@@ -258,27 +305,28 @@ data class CategorySpendingDashboardItem(
     val progress: Float
 )
 
+// ---------------- CARD ----------------
 @Composable
 fun CategorySpendingDashboardCard(
     title: String,
     spentAmount: Double,
     remainingAmount: Double,
-    progress: Float
+    progress: Float,
+    currencySymbol: String
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .padding(vertical = 6.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+
+        Column(Modifier.padding(12.dp)) {
 
             Text(title, fontWeight = FontWeight.Bold)
 
-            Spacer(Modifier.height(6.dp))
-
-            Text("Spent: R %.2f".format(spentAmount))
-            Text("Remaining: R %.2f".format(remainingAmount))
+            Text("Spent: $currencySymbol %.2f".format(spentAmount))
+            Text("Remaining: $currencySymbol %.2f".format(remainingAmount))
 
             Spacer(Modifier.height(8.dp))
 
@@ -286,6 +334,7 @@ fun CategorySpendingDashboardCard(
         }
     }
 }
+
 
 //Title: Androidx.compose.material3
 //Author: Android Develops

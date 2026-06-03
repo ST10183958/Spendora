@@ -73,7 +73,7 @@ class ExpenseRepository(
         budgetDao.upsertBudgetGoal(
             com.menak.login.data.Entity.BudgetGoalEntity(
                 id = 1,
-                monthlyTotalBudget = amount   // ✅ FIXED NAME
+                monthlyTotalBudget = amount
             )
         )
     }

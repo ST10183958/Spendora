@@ -12,11 +12,17 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.menak.login.data.AppDatabase
 import com.menak.login.data.Repository.FirebaseAuthRepository
 import com.menak.login.data.Repository.ExpenseRepository
+import com.menak.login.data.Repository.CurrencyManagerRepository
 import com.menak.login.navigation.AppNavGraph
 import com.menak.login.navigation.AuthNavGraph
-import com.menak.login.theme.LoginTheme
-import com.menak.login.ui.*
+import com.menak.login.screens.ViewModel.CurrencyViewModel
+import com.menak.login.screens.ViewModel.CurrencyViewModelFactory
 import com.menak.login.screens.ViewModel.SettingsViewModel
+import com.menak.login.ui.AuthViewModel
+import com.menak.login.ui.AuthViewModelFactory
+import com.menak.login.ui.ExpenseViewModel
+import com.menak.login.ui.ExpenseViewModelFactory
+import com.menak.login.theme.LoginTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -28,7 +34,9 @@ class MainActivity : ComponentActivity() {
         val database = AppDatabase.getDatabase(applicationContext)
         val firestore = FirebaseFirestore.getInstance()
 
-        val authRepository = FirebaseAuthRepository(auth)
+        val authRepository = FirebaseAuthRepository(
+            auth = auth,
+        )
 
         val expenseRepository = ExpenseRepository(
             categoryDao = database.categoryDao(),
@@ -37,42 +45,50 @@ class MainActivity : ComponentActivity() {
             firestore = firestore
         )
 
+        val currencyRepository = CurrencyManagerRepository(applicationContext)
+
         val authFactory = AuthViewModelFactory(authRepository)
         val expenseFactory = ExpenseViewModelFactory(expenseRepository)
+        val currencyFactory = CurrencyViewModelFactory(currencyRepository)
 
         setContent {
 
-            val authViewModel: AuthViewModel = viewModel(factory = authFactory)
-            val expenseViewModel: ExpenseViewModel = viewModel(factory = expenseFactory)
+            val authViewModel: AuthViewModel =
+                viewModel(factory = authFactory)
+
+            val expenseViewModel: ExpenseViewModel =
+                viewModel(factory = expenseFactory)
+
+            val currencyVM: CurrencyViewModel =
+                viewModel(factory = currencyFactory)
+
+            val settingsVM: SettingsViewModel =
+                viewModel()
 
             val authUiState by authViewModel.uiState.collectAsState()
-            val firebaseUser = auth.currentUser
+            val darkMode by settingsVM.darkMode.collectAsState()
 
-            val settingsVm: SettingsViewModel = viewModel()
-            val darkMode by settingsVm.darkMode.collectAsState()
-
-            val isLoggedIn = authUiState.isLoggedIn || firebaseUser != null
+            val isLoggedIn =
+                authUiState.isLoggedIn || auth.currentUser != null
 
             LoginTheme(darkTheme = darkMode) {
 
                 if (isLoggedIn) {
-
-                    val username =
-                        authUiState.loggedInUsername.ifEmpty {
-                            firebaseUser?.email ?: "User"
-                        }
 
                     val navController = rememberNavController()
 
                     AppNavGraph(
                         navController = navController,
                         viewModel = expenseViewModel,
-                        username = username,
+                        settingsVM = settingsVM,
+                        currencyVM = currencyVM,
+                        username = authUiState.loggedInUsername.ifEmpty {
+                            auth.currentUser?.email ?: "User"
+                        },
                         onLogout = {
                             authViewModel.logout()
                             auth.signOut()
-                        },
-                        settingsVM = settingsVm
+                        }
                     )
 
                 } else {

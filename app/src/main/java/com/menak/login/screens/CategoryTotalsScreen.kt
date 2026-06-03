@@ -11,13 +11,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.menak.login.ui.components.DatePickerField
+import com.menak.login.screens.ViewModel.CurrencyViewModel
 
 @Composable
 fun CategoryTotalsScreen(
-    viewModel: ExpenseViewModel
+    viewModel: ExpenseViewModel,
+    currencyVM: CurrencyViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
+    val selectedCurrency = currencyVM.currency.value
 
     val categoryMap = uiState.categories.associateBy { it.id }
 
@@ -101,7 +103,7 @@ fun CategoryTotalsScreen(
                             )
 
                             Text(
-                                text = "Total Spent: R %.2f".format(total.total)
+                                text = "Total Spent: \${selectedCurrency.symbol} %.2f".format(total.total)
                             )
                         }
                     }

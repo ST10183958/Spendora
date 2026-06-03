@@ -2,24 +2,19 @@ package com.menak.login.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.menak.login.data.Entity.*
 import com.menak.login.data.Repository.ExpenseRepository
-import com.menak.login.data.Entity.ExpenseEntity
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-
 
 sealed class UiEvent {
     data class ShowSnackbar(val message: String) : UiEvent()
 }
 
-
-
 class ExpenseViewModel(
     private val repository: ExpenseRepository
 ) : ViewModel() {
-
-
 
     private val _uiState = MutableStateFlow(ExpenseUiState())
     val uiState: StateFlow<ExpenseUiState> = _uiState
@@ -30,25 +25,70 @@ class ExpenseViewModel(
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
-
-
     init {
+
+        // ---------------- CATEGORIES ----------------
         viewModelScope.launch {
             repository.getAllCategories()
                 .collect { list ->
                     _uiState.update { it.copy(categories = list) }
                 }
         }
+
+        // ---------------- EXPENSES (SINGLE SOURCE OF TRUTH) ----------------
+        viewModelScope.launch {
+            repository.getAllExpenses()
+                .collect { expenses ->
+
+                    _uiState.update {
+                        it.copy(expenses = expenses)
+                    }
+
+                    updateAnalytics(expenses)
+                }
+        }
     }
 
+    // ---------------- ANALYTICS ----------------
+    private fun updateAnalytics(expenses: List<ExpenseEntity>) {
 
+        val total = expenses.sumOf { it.amount }
+
+        val daily = expenses.groupBy { it.startDate }
+            .map {
+                DailySpendingItem(
+                    date = it.key,
+                    amount = it.value.sumOf { e -> e.amount }
+                )
+            }
+
+        val categoryBreakdown = expenses.groupBy { it.categoryId }
+            .map {
+                CategoryAnalyticsItem(
+                    name = it.key.toString(),
+                    amount = it.value.sumOf { e -> e.amount },
+                    color = 0xFF00A896
+                )
+            }
+
+        _analyticsUiState.value = AnalyticsUiState(
+            totalSpent = total,
+            dailyAverage = if (expenses.isNotEmpty()) total / expenses.size else 0.0,
+            thisMonthTotal = total,
+            lastMonthTotal = 0.0,
+            categoryBreakdown = categoryBreakdown,
+            dailySpending = daily
+        )
+    }
+
+    // ---------------- EVENTS ----------------
     fun sendSnackbar(message: String) {
         viewModelScope.launch {
             _uiEvent.send(UiEvent.ShowSnackbar(message))
         }
     }
 
-
+    // ---------------- EXPENSE INPUTS ----------------
     fun onExpenseNameChange(value: String) {
         _uiState.update { it.copy(expenseName = value) }
     }
@@ -81,10 +121,10 @@ class ExpenseViewModel(
         _uiState.update { it.copy(receiptPhotoUrl = uri) }
     }
 
-
+    // ---------------- ADD EXPENSE ----------------
     fun addExpense() {
-        val state = _uiState.value
 
+        val state = _uiState.value
         val amount = state.expenseAmount.toDoubleOrNull()
 
         if (state.expenseName.isBlank() || amount == null) {
@@ -132,6 +172,7 @@ class ExpenseViewModel(
         }
     }
 
+    // ---------------- CATEGORY ----------------
     fun onCategoryTypeChange(value: String) {
         _uiState.update { it.copy(categoryType = value) }
     }
@@ -145,6 +186,7 @@ class ExpenseViewModel(
     }
 
     fun addCategory() {
+
         val state = _uiState.value
 
         if (state.categoryType.isBlank()) {
@@ -162,7 +204,10 @@ class ExpenseViewModel(
                 setMessage("Category added")
 
                 _uiState.update {
-                    it.copy(categoryType = "", categoryIconUri = "")
+                    it.copy(
+                        categoryType = "",
+                        categoryIconUri = ""
+                    )
                 }
 
             } catch (e: Exception) {
@@ -171,7 +216,7 @@ class ExpenseViewModel(
         }
     }
 
-
+    // ---------------- BUDGET ----------------
     fun onMonthlyBudgetGoalInputChange(value: String) {
         _uiState.update { it.copy(monthlyBudgetGoalInput = value) }
     }
@@ -185,6 +230,7 @@ class ExpenseViewModel(
     }
 
     fun saveMonthlyBudgetGoal() {
+
         val amount = _uiState.value.monthlyBudgetGoalInput.toDoubleOrNull() ?: return
 
         viewModelScope.launch {
@@ -200,6 +246,7 @@ class ExpenseViewModel(
     }
 
     fun saveCategoryBudgetLimit() {
+
         val state = _uiState.value
 
         val categoryId = state.selectedBudgetCategoryId ?: return
@@ -217,7 +264,7 @@ class ExpenseViewModel(
         }
     }
 
-
+    // ---------------- PERIOD FILTER ----------------
     fun onPeriodFromDateChange(value: String) {
         _uiState.update { it.copy(periodFromDate = value) }
     }
@@ -226,25 +273,24 @@ class ExpenseViewModel(
         _uiState.update { it.copy(periodToDate = value) }
     }
 
-    fun loadCategoryTotalsForSelectedPeriod() {
-        val from = _uiState.value.periodFromDate
-        val to = _uiState.value.periodToDate
+    fun loadExpensesForSelectedPeriod() {
 
-        if (from.isBlank() || to.isBlank()) {
-            sendSnackbar("Select dates")
-            return
-        }
+        val state = _uiState.value
 
         viewModelScope.launch {
-            val totals = repository.getCategoryTotalsBetweenDates(from, to).first()
-
-            _uiState.update {
-                it.copy(categoryTotals = totals)
+            repository.getExpensesBetweenDates(
+                state.periodFromDate,
+                state.periodToDate
+            ).collect { list ->
+                _uiState.update {
+                    it.copy(filteredExpenses = list)
+                }
             }
         }
     }
 
-    fun loadExpensesForSelectedPeriod() {
+    fun loadCategoryTotalsForSelectedPeriod() {
+
         val from = _uiState.value.periodFromDate
         val to = _uiState.value.periodToDate
 
@@ -254,10 +300,12 @@ class ExpenseViewModel(
         }
 
         viewModelScope.launch {
-            val list = repository.getExpensesBetweenDates(from, to).first()
+            val totals = repository
+                .getCategoryTotalsBetweenDates(from, to)
+                .first()
 
             _uiState.update {
-                it.copy(filteredExpenses = list)
+                it.copy(categoryTotals = totals)
             }
         }
     }

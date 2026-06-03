@@ -41,6 +41,7 @@ fun DashboardScaffold(
         Routes.HISTORY,
         Routes.ANALYTICS,
         Routes.BUDGET,
+        Routes.CURRENCY_SETTINGS,
         Routes.HELP,
         Routes.CATEGORY_TOTALS,
     )
@@ -58,6 +59,7 @@ fun DashboardScaffold(
         Routes.HISTORY -> "Expense History"
         Routes.ANALYTICS -> "Analytics"
         Routes.BUDGET -> "Budget Settings"
+        Routes.CURRENCY_SETTINGS -> "Currency Settings"
         Routes.HELP -> "Help"
         Routes.SETTINGS,
         Routes.CATEGORY_TOTALS -> "Category Totals"
@@ -153,6 +155,19 @@ fun DashboardScaffold(
                     onClick = {
                         scope.launch { drawerState.close() }
                         navController.navigate(Routes.BUDGET) { launchSingleTop = true }
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(16.dp))
+
+
+                NavigationDrawerItem(
+                    label = { Text("Currency Settings") },
+                    selected = currentRoute == Routes.CURRENCY_SETTINGS,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate(Routes.CURRENCY_SETTINGS) { launchSingleTop = true }
                     },
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )

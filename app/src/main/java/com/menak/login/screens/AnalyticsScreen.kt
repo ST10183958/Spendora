@@ -1,6 +1,5 @@
 package com.menak.login.ui
 
-import android.graphics.Color as AndroidColor
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -21,22 +20,20 @@ import androidx.navigation.NavController
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.*
-import kotlin.math.max
+import com.menak.login.screens.ViewModel.CurrencyViewModel
 
 @Composable
 fun AnalyticsScreen(
     navController: NavController,
-    viewModel: ExpenseViewModel
+    viewModel: ExpenseViewModel,
+    currencyVM: CurrencyViewModel
 ) {
-    val analytics by viewModel.analyticsUiState.collectAsState()
 
-    fun safeFloat(value: Double): Float =
-        if (value.isFinite()) value.toFloat() else 0f
+    // ---------------- SAFE STATE HANDLING ----------------
+    val analyticsState = viewModel.analyticsUiState.collectAsState()
+    val analytics = analyticsState.value
 
-    fun safeProgress(value: Double, max: Double): Float =
-        if (max > 0.0 && value.isFinite() && max.isFinite())
-            (value / max).toFloat().coerceIn(0f, 1f)
-        else 0f
+    val currency = currencyVM.currency.value
 
     Box(
         modifier = Modifier
@@ -50,171 +47,188 @@ fun AnalyticsScreen(
                 .verticalScroll(rememberScrollState())
         ) {
 
-
+            // ---------------- HEADER ----------------
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(220.dp)
                     .background(
-                        color = Color(0xFF00BFA5),
+                        Color(0xFF00BFA5),
                         shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)
                     )
             ) {
-                Column(
-                    modifier = Modifier.padding(top = 28.dp, start = 12.dp, end = 12.dp)
-                ) {
+
+                Column(modifier = Modifier.padding(20.dp)) {
+
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         IconButton(onClick = { navController.popBackStack() }) {
                             Icon(
                                 Icons.Default.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = null,
                                 tint = Color.White
                             )
                         }
 
-                        Text("Analytics", color = Color.White, fontSize = 24.sp)
+                        Text(
+                            text = "Analytics",
+                            color = Color.White,
+                            fontSize = 24.sp
+                        )
                     }
 
                     Text(
-                        "Spending insights",
+                        text = "Spending insights",
                         color = Color(0xFFE0F2F1),
                         fontSize = 14.sp,
-                        modifier = Modifier.padding(start = 20.dp)
+                        modifier = Modifier.padding(start = 12.dp)
                     )
                 }
             }
 
-
             Column(
-                modifier = Modifier
-                    .padding(20.dp)
-                    .fillMaxWidth()
+                modifier = Modifier.padding(16.dp)
             ) {
 
-
+                // ---------------- STATS ----------------
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+
                     AnalyticsStatCard(
                         modifier = Modifier.weight(1f),
                         title = "Total Spent",
-                        value = "R %.2f".format(analytics.totalSpent)
+                        value = "${currency.symbol} %.2f".format(analytics.totalSpent)
                     )
 
                     AnalyticsStatCard(
                         modifier = Modifier.weight(1f),
                         title = "Daily Avg",
-                        value = "R %.2f".format(analytics.dailyAverage)
+                        value = "${currency.symbol} %.2f".format(analytics.dailyAverage)
                     )
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(4.dp)
-                ) {
-                    Column(Modifier.padding(16.dp)) {
-
-                        Text("Spending Goals", fontSize = 16.sp)
-
-                        Spacer(Modifier.height(12.dp))
-
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("Minimum Goal", color = Color(0xFF00C853))
-                            Text("R %.2f".format(analytics.minGoal), color = Color(0xFF00C853))
-                        }
-
-                        Spacer(Modifier.height(8.dp))
-
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("Maximum Limit", color = Color(0xFFFF5252))
-                            Text("R %.2f".format(analytics.maxGoal), color = Color(0xFFFF5252))
-                        }
-
-                        Spacer(Modifier.height(12.dp))
-
-                        val progress = safeProgress(
-                            analytics.totalSpent,
-                            analytics.maxGoal
-                        )
-
-                        LinearProgressIndicator(
-                            progress = progress,
-                            modifier = Modifier.fillMaxWidth(),
-                            color = if (analytics.totalSpent <= analytics.minGoal)
-                                Color(0xFF00C853)
-                            else
-                                Color(0xFFFF5252)
-                        )
-
-                        Spacer(Modifier.height(8.dp))
+                // ---------------- PIE CHART ----------------
+                Card {
+                    Column(modifier = Modifier.padding(16.dp)) {
 
                         Text(
-                            "Current: R %.2f".format(analytics.totalSpent),
-                            color = Color.Gray,
-                            fontSize = 13.sp
+                            text = "Category Breakdown",
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        AndroidView(
+                            factory = { context ->
+                                PieChart(context).apply {
+                                    description.isEnabled = false
+                                    legend.isEnabled = false
+                                }
+                            },
+                            update = { chart ->
+
+                                val entries = analytics.categoryBreakdown.map {
+                                    PieEntry(it.amount.toFloat(), it.name)
+                                }
+
+                                val dataSet = PieDataSet(entries, "")
+                                dataSet.colors = analytics.categoryBreakdown.map {
+                                    it.color.toInt()
+                                }
+
+                                chart.data = PieData(dataSet)
+                                chart.invalidate()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(220.dp)
                         )
                     }
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-4
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(4.dp)
-                ) {
-                    Column(Modifier.padding(16.dp)) {
-
-                        Text("Goal Performance (Monthly)", fontSize = 16.sp)
-
-                        Spacer(Modifier.height(12.dp))
-
-                        val score = analytics.goalScore.coerceIn(0.0, 100.0)
+                // ---------------- BAR CHART ----------------
+                Card {
+                    Column(modifier = Modifier.padding(16.dp)) {
 
                         Text(
-                            "Score: %.0f%%".format(score),
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (score >= 70) Color(0xFF00C853) else Color(0xFFFF5252)
+                            text = "Daily Spending",
+                            fontWeight = FontWeight.Bold
                         )
 
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                        LinearProgressIndicator(
-                            progress = (score / 100.0).toFloat(),
-                            modifier = Modifier.fillMaxWidth(),
-                            color = if (score >= 70) Color(0xFF00C853) else Color(0xFFFF5252)
+                        AndroidView(
+                            factory = { context ->
+                                BarChart(context).apply {
+                                    description.isEnabled = false
+                                    legend.isEnabled = false
+                                    axisRight.isEnabled = false
+                                }
+                            },
+                            update = { chart ->
+
+                                val entries = analytics.dailySpending.mapIndexed { index, item ->
+                                    BarEntry(index.toFloat(), item.amount.toFloat())
+                                }
+
+                                val dataSet = BarDataSet(entries, "Daily Spending")
+
+                                chart.data = BarData(dataSet)
+                                chart.invalidate()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(220.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // ---------------- MONTHLY COMPARISON ----------------
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF00BFA5))
+                ) {
+
+                    Column(modifier = Modifier.padding(16.dp)) {
+
+                        Text(
+                            text = "Monthly Comparison",
+                            color = Color.White
                         )
 
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         Row(
-                            Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(
-                                "Within Goal: %.0f%%".format(analytics.daysWithinGoalPercent),
-                                color = Color(0xFF00C853)
-                            )
 
-                            Text(
-                                "Over Goal: %.0f%%".format(analytics.daysOverGoalPercent),
-                                color = Color(0xFFFF5252)
-                            )
+                            Column {
+                                Text("This Month", color = Color(0xFFB2DFDB))
+                                Text(
+                                    "${currency.symbol} %.2f".format(analytics.thisMonthTotal),
+                                    color = Color.White
+                                )
+                            }
+
+                            Column {
+                                Text("Last Month", color = Color(0xFFB2DFDB))
+                                Text(
+                                    "${currency.symbol} %.2f".format(analytics.lastMonthTotal),
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
                 }
 
-                Spacer(Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -228,11 +242,12 @@ fun AnalyticsStatCard(
 ) {
     Card(
         modifier = modifier.height(100.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF00BFA5)),
-        elevation = CardDefaults.cardElevation(4.dp)
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF00BFA5))
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
             Text(
                 text = title,
                 color = Color(0xFFD0F3EE),
@@ -244,7 +259,7 @@ fun AnalyticsStatCard(
             Text(
                 text = value,
                 color = Color.White,
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
         }

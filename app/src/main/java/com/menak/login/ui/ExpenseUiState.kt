@@ -52,4 +52,6 @@ data class ExpenseUiState(
 
     val dashboardCategorySpending: List<CategoryDashboardItem> = emptyList(),
     val message: String = ""
+
+
 )

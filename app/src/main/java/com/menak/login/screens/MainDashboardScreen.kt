@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.menak.login.R
 import com.menak.login.screens.ViewModel.CurrencyViewModel
+import com.menak.login.ui.components.BottomBar
 import kotlinx.coroutines.launch
 import kotlin.math.max
 
@@ -179,6 +180,7 @@ fun MainDashboardScreen(
                     )
                 )
             },
+
 
             floatingActionButton = {
                 FloatingActionButton(

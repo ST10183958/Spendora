@@ -46,61 +46,59 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.compose.foundation.layout)
-    // Core Android
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
+    dependencies {
 
-    // Compose BOM
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.foundation.layout)
+        // Core Android
+        implementation("androidx.core:core-ktx:1.13.1")
+        implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+        implementation("androidx.activity:activity-compose:1.9.2")
 
-    // Navigation + ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
-    implementation("androidx.navigation:navigation-compose:2.8.0")
-    implementation("androidx.compose.material:material-icons-extended")
+        implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
-    // ROOM
-    implementation("androidx.room:room-runtime:2.7.2")
-    implementation("androidx.room:room-ktx:2.7.2")
-    ksp("androidx.room:room-compiler:2.7.2")
+        implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    // MPAndroidChart
-    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+        // Compose BOM
+        implementation(platform("androidx.compose:compose-bom:2024.06.00"))
 
-    // 🔥 FIREBASE (NEW)
-    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+        implementation("androidx.compose.ui:ui")
+        implementation("androidx.compose.ui:ui-graphics")
+        implementation("androidx.compose.ui:ui-tooling-preview")
+        implementation("androidx.compose.material3:material3")
+        implementation("androidx.compose.foundation:foundation")
 
-    // Firebase Authentication (required for login system upgrade)
-    implementation("com.google.firebase:firebase-auth-ktx")
+        // Navigation + ViewModel
+        implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+        implementation("androidx.navigation:navigation-compose:2.8.0")
+        implementation("androidx.compose.material:material-icons-extended")
 
-    // Firestore (NO Storage as requested)
-    implementation("com.google.firebase:firebase-firestore-ktx")
+        // ROOM
+        implementation("androidx.room:room-runtime:2.7.2")
+        implementation("androidx.room:room-ktx:2.7.2")
+        ksp("androidx.room:room-compiler:2.7.2")
 
-    // Optional but useful
-    implementation("com.google.firebase:firebase-analytics-ktx")
+        // MPAndroidChart
+        implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
-    // Coroutines support for Firebase
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
+        // FIREBASE
+        implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+        implementation("com.google.firebase:firebase-auth-ktx")
+        implementation("com.google.firebase:firebase-firestore-ktx")
+        implementation("com.google.firebase:firebase-analytics-ktx")
 
-    // Testing
-    testImplementation(libs.junit)
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("androidx.room:room-testing:2.7.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("androidx.arch.core:core-testing:2.2.0")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation("androidx.arch.core:core-testing:2.2.0")
+        // Testing
+        testImplementation("junit:junit:4.13.2")
+        testImplementation("androidx.room:room-testing:2.7.2")
+        testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+        testImplementation("androidx.arch.core:core-testing:2.2.0")
 
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
+        androidTestImplementation("androidx.test.ext:junit:1.2.1")
+        androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+        androidTestImplementation(platform("androidx.compose:compose-bom:2024.06.00"))
+        androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+
+        debugImplementation("androidx.compose.ui:ui-tooling")
+        debugImplementation("androidx.compose.ui:ui-test-manifest")
+    }
 }

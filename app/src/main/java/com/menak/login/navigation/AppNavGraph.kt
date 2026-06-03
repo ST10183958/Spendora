@@ -5,15 +5,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.menak.login.ui.AddCategoryScreen
-import com.menak.login.ui.AddExpenseScreen
-import com.menak.login.ui.AnalyticsScreen
-import com.menak.login.ui.BudgetScreen
-import com.menak.login.screens.HelpScreen
-import com.menak.login.ui.CategoryTotalsScreen
-import com.menak.login.screens.ExpensePeriodListScreen
-import com.menak.login.ui.ExpenseViewModel
-import com.menak.login.ui.MainDashboardScreen
+import com.menak.login.ui.*
+import com.menak.login.screens.*
+import com.menak.login.screens.ViewModel.SettingsViewModel
 
 @Composable
 fun AppNavGraph(
@@ -21,6 +15,7 @@ fun AppNavGraph(
     viewModel: ExpenseViewModel,
     username: String,
     onLogout: () -> Unit,
+    settingsVM: SettingsViewModel,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -28,6 +23,7 @@ fun AppNavGraph(
         startDestination = "expense_home",
         modifier = modifier
     ) {
+
         composable("expense_home") {
             MainDashboardScreen(
                 username = username,
@@ -55,15 +51,14 @@ fun AppNavGraph(
         composable("budget_screen") {
             BudgetScreen(
                 viewModel = viewModel,
-                onBackClick = { navController.popBackStack() },
-
+                onBackClick = { navController.popBackStack() }
             )
         }
 
         composable("expense_period_list") {
             ExpensePeriodListScreen(
                 viewModel = viewModel,
-                onBackClick = { navController.popBackStack() },
+                onBackClick = { navController.popBackStack() }
             )
         }
 
@@ -77,9 +72,15 @@ fun AppNavGraph(
                 viewModel = viewModel
             )
         }
+
         composable("help_screen") {
-            HelpScreen(
+            HelpScreen(navController = navController)
+        }
+
+        composable("settings_screen") {
+            SettingsScreen(
                 navController = navController,
+                settingsVM = settingsVM
             )
         }
     }

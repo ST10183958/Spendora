@@ -411,10 +411,7 @@ fun AddExpenseScreen(
                                 },
 
                                 modifier = Modifier
-                                    .menuAnchor(
-                                        MenuAnchorType.PrimaryNotEditable,
-                                        true
-                                    )
+                                    .menuAnchor()
                                     .fillMaxWidth(),
 
                                 shape = RoundedCornerShape(12.dp),

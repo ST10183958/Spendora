@@ -24,6 +24,7 @@ import androidx.navigation.NavController
 import com.menak.login.R
 import kotlinx.coroutines.launch
 import kotlin.math.max
+import com.menak.login.navigation.Routes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -130,6 +131,17 @@ fun MainDashboardScreen(
                     }
                 )
                 Spacer(Modifier.height(20.dp))
+                NavigationDrawerItem(
+                    label = { Text("Settings") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate("settings_screen")
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+                Spacer(Modifier.height(20.dp))
+
 
                 NavigationDrawerItem(
                     label = { Text("Logout") },

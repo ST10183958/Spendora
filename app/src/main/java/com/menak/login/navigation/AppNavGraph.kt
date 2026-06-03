@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.menak.login.data.Repository.CurrencyManagerRepository
 import com.menak.login.screens.CurrencySettingsScreen
+import com.menak.login.screens.HelpScreen
 import com.menak.login.screens.SettingsScreen
 import com.menak.login.screens.ViewModel.CurrencyViewModel
 import com.menak.login.screens.ViewModel.SettingsViewModel
@@ -62,19 +63,26 @@ fun AppNavGraph(
         composable("budget_screen") {
             BudgetScreen(
                 viewModel = viewModel,
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                currencyVM = currencyVM
             )
         }
 
         composable("expense_period_list") {
             ExpensePeriodListScreen(
                 viewModel = viewModel,
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                currencyVM = currencyVM
             )
         }
 
         composable("category_totals") {
-            CategoryTotalsScreen(viewModel = viewModel)
+            CategoryTotalsScreen(
+                viewModel = viewModel,
+            currencyVM = currencyVM
+            )
+
+
         }
 
         composable("analytics_screen") {
@@ -96,6 +104,12 @@ fun AppNavGraph(
             SettingsScreen(
                 navController = navController,
                 settingsVM = settingsVM
+            )
+        }
+
+        composable("help_screen") {
+            HelpScreen(
+                navController = navController,
             )
         }
     }

@@ -76,6 +76,8 @@ object DashboardRoutes {
 
     const val SETTINGS = "settings_screen"
 
+    const val HELP = "help_screen"
+
     const val CATEGORY_TOTALS = "category_totals"
 }
 
@@ -201,6 +203,16 @@ fun MainDashboardScreen(
                     onClick = {
                         scope.launch { drawerState.close() }
                         navController.navigate(DashboardRoutes.SETTINGS)
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("Help") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate(DashboardRoutes.HELP)
                     },
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )

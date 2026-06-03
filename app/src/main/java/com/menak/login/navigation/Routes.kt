@@ -13,6 +13,8 @@ object Routes {
 
     const val CURRENCY_SETTINGS = "currency_settings"
 
+    const val HELP = "help_screen"
+
     const val SETTINGS = "settings_screen"
 }
 

@@ -16,13 +16,9 @@ class AuthViewModel(
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
-    // 🔥 CLEAN ACCESSOR (prevents your error completely)
     private val state: AuthUiState
         get() = _uiState.value
 
-    // =========================
-    // INPUT HANDLERS
-    // =========================
 
     fun onUsernameChange(value: String) {
         _uiState.value = state.copy(username = value)
@@ -39,10 +35,6 @@ class AuthViewModel(
     fun clearMessage() {
         _uiState.value = state.copy(message = "")
     }
-
-    // =========================
-    // REGISTER
-    // =========================
 
     fun register() {
         val username = state.username.trim()
@@ -81,9 +73,6 @@ class AuthViewModel(
         }
     }
 
-    // =========================
-    // LOGIN
-    // =========================
 
     fun login() {
         val username = state.username.trim()
@@ -117,10 +106,6 @@ class AuthViewModel(
             )
         }
     }
-
-    // =========================
-    // LOGOUT
-    // =========================
 
     fun logout() {
         _uiState.value = AuthUiState(

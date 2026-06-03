@@ -4,10 +4,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.menak.login.data.Dao.BudgetDao
 import com.menak.login.data.Dao.CategoryDao
 import com.menak.login.data.Dao.ExpenseDao
-import com.menak.login.data.Entity.BudgetGoalEntity
-import com.menak.login.data.Entity.CategoryBudgetLimitEntity
 import com.menak.login.data.Entity.CategoryEntity
+import com.menak.login.data.Entity.CategorySpendingTotal
 import com.menak.login.data.Entity.ExpenseEntity
+import kotlinx.coroutines.flow.Flow
 
 class ExpenseRepository(
     private val categoryDao: CategoryDao,
@@ -16,7 +16,6 @@ class ExpenseRepository(
     private val firestore: FirebaseFirestore
 ) {
 
-    // ---------------- CATEGORY ----------------
 
     suspend fun addCategory(type: String, iconUrl: String) {
         val category = CategoryEntity(
@@ -35,10 +34,9 @@ class ExpenseRepository(
             )
     }
 
-    fun getAllCategories() =
+    fun getAllCategories(): Flow<List<CategoryEntity>> =
         categoryDao.getAllCategories()
 
-    // ---------------- EXPENSE ----------------
 
     suspend fun addExpense(expense: ExpenseEntity) {
         expenseDao.insert(expense)
@@ -58,29 +56,31 @@ class ExpenseRepository(
             )
     }
 
-    fun getAllExpenses() =
+    fun getAllExpenses(): Flow<List<ExpenseEntity>> =
         expenseDao.getAllExpenses()
 
-    fun getExpensesBetweenDates(from: String, to: String) =
+    fun getExpensesBetweenDates(from: String, to: String): Flow<List<ExpenseEntity>> =
         expenseDao.getExpensesBetweenDates(from, to)
 
-    fun getCategoryTotalsBetweenDates(from: String, to: String) =
+    fun getCategoryTotalsBetweenDates(
+        from: String,
+        to: String
+    ): Flow<List<CategorySpendingTotal>> =
         expenseDao.getCategoryTotalsBetweenDates(from, to)
 
-    // ---------------- BUDGET ----------------
 
-    suspend fun saveMonthlyBudgetGoal(monthlyTotalBudget: Double) {
+    suspend fun saveMonthlyBudgetGoal(amount: Double) {
         budgetDao.upsertBudgetGoal(
-            BudgetGoalEntity(
+            com.menak.login.data.Entity.BudgetGoalEntity(
                 id = 1,
-                monthlyTotalBudget = monthlyTotalBudget
+                monthlyTotalBudget = amount   // ✅ FIXED NAME
             )
         )
     }
 
     suspend fun saveCategoryBudgetLimit(categoryId: Int, limit: Double) {
         budgetDao.upsertCategoryBudgetLimit(
-            CategoryBudgetLimitEntity(
+            com.menak.login.data.Entity.CategoryBudgetLimitEntity(
                 categoryId = categoryId,
                 monthlyLimit = limit
             )

@@ -40,7 +40,7 @@ data class ExpenseUiState(
     val expenses: List<ExpenseEntity> = emptyList(),
     val filteredExpenses: List<ExpenseEntity> = emptyList(),
 
-    // ✅ FIXED LINE
+
     val categoryTotals: List<CategorySpendingTotal> = emptyList(),
     val budgetGoal: BudgetGoalEntity? = null,
     val categoryBudgetLimits: List<CategoryBudgetLimitEntity> = emptyList(),

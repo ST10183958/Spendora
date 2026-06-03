@@ -28,12 +28,12 @@ interface ExpenseDao {
     ): Flow<List<ExpenseEntity>>
 
     @Query("""
-        SELECT categoryId AS categoryId,
-               SUM(amount) AS total
-        FROM expenses
-        WHERE startDate BETWEEN :from AND :to
-        GROUP BY categoryId
-    """)
+    SELECT categoryId AS categoryId,
+           SUM(amount) AS total
+    FROM expenses
+    WHERE startDate BETWEEN :from AND :to
+    GROUP BY categoryId
+""")
     fun getCategoryTotalsBetweenDates(
         from: String,
         to: String

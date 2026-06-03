@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         val database = AppDatabase.getDatabase(applicationContext)
         val firestore = FirebaseFirestore.getInstance()
 
-        // ✅ FIREBASE AUTH REPOSITORY (FIXED)
+
         val authRepository = FirebaseAuthRepository(auth)
 
         val expenseRepository = ExpenseRepository(
@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             LoginTheme {
-
+//
                 val authViewModel: AuthViewModel =
                     viewModel(factory = authFactory)
 

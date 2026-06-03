@@ -13,7 +13,7 @@ class FirestoreRepository(
     private fun userId(): String =
         authRepo.currentUserId() ?: throw Exception("User not logged in")
 
-    // ---------------- USERS PROFILE ----------------
+
     suspend fun createUserProfile(username: String) {
         val data = mapOf(
             "username" to username
@@ -25,7 +25,6 @@ class FirestoreRepository(
             .await()
     }
 
-    // ---------------- CATEGORIES ----------------
     suspend fun addCategory(category: CategoryEntity) {
         db.collection("users")
             .document(userId())
@@ -43,7 +42,7 @@ class FirestoreRepository(
             .toObjects(CategoryEntity::class.java)
     }
 
-    // ---------------- EXPENSES ----------------
+
     suspend fun addExpense(expense: ExpenseEntity) {
         db.collection("users")
             .document(userId())
@@ -61,7 +60,6 @@ class FirestoreRepository(
             .toObjects(ExpenseEntity::class.java)
     }
 
-    // ---------------- BUDGET ----------------
     suspend fun saveBudget(goal: BudgetGoalEntity) {
         db.collection("users")
             .document(userId())

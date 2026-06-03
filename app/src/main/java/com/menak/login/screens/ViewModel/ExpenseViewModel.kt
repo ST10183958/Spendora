@@ -8,17 +8,18 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-// ---------------- UI EVENTS ----------------
 
 sealed class UiEvent {
     data class ShowSnackbar(val message: String) : UiEvent()
 }
 
+
+
 class ExpenseViewModel(
     private val repository: ExpenseRepository
 ) : ViewModel() {
 
-    // ---------------- UI STATE ----------------
+
 
     private val _uiState = MutableStateFlow(ExpenseUiState())
     val uiState: StateFlow<ExpenseUiState> = _uiState
@@ -29,7 +30,17 @@ class ExpenseViewModel(
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
-    // ---------------- SNACKBAR ----------------
+
+
+    init {
+        viewModelScope.launch {
+            repository.getAllCategories()
+                .collect { list ->
+                    _uiState.update { it.copy(categories = list) }
+                }
+        }
+    }
+
 
     fun sendSnackbar(message: String) {
         viewModelScope.launch {
@@ -37,9 +48,6 @@ class ExpenseViewModel(
         }
     }
 
-    // =========================================================
-    // EXPENSE INPUTS
-    // =========================================================
 
     fun onExpenseNameChange(value: String) {
         _uiState.update { it.copy(expenseName = value) }
@@ -73,9 +81,6 @@ class ExpenseViewModel(
         _uiState.update { it.copy(receiptPhotoUrl = uri) }
     }
 
-    // =========================================================
-    // ADD EXPENSE (FIXED)
-    // =========================================================
 
     fun addExpense() {
         val state = _uiState.value
@@ -83,13 +88,12 @@ class ExpenseViewModel(
         val amount = state.expenseAmount.toDoubleOrNull()
 
         if (state.expenseName.isBlank() || amount == null) {
-            sendSnackbar("Please fill required fields")
+            sendSnackbar("Fill required fields")
             return
         }
 
-        val categoryId = state.selectedCategoryId
-        if (categoryId == null) {
-            sendSnackbar("Please select category")
+        val categoryId = state.selectedCategoryId ?: run {
+            sendSnackbar("Select category")
             return
         }
 
@@ -108,7 +112,7 @@ class ExpenseViewModel(
                     )
                 )
 
-                sendSnackbar("Expense added successfully")
+                sendSnackbar("Expense added")
 
                 _uiState.update {
                     it.copy(
@@ -127,10 +131,6 @@ class ExpenseViewModel(
             }
         }
     }
-
-    // =========================================================
-    // CATEGORY
-    // =========================================================
 
     fun onCategoryTypeChange(value: String) {
         _uiState.update { it.copy(categoryType = value) }
@@ -162,10 +162,7 @@ class ExpenseViewModel(
                 setMessage("Category added")
 
                 _uiState.update {
-                    it.copy(
-                        categoryType = "",
-                        categoryIconUri = ""
-                    )
+                    it.copy(categoryType = "", categoryIconUri = "")
                 }
 
             } catch (e: Exception) {
@@ -174,9 +171,6 @@ class ExpenseViewModel(
         }
     }
 
-    // =========================================================
-    // BUDGET
-    // =========================================================
 
     fun onMonthlyBudgetGoalInputChange(value: String) {
         _uiState.update { it.copy(monthlyBudgetGoalInput = value) }
@@ -198,7 +192,7 @@ class ExpenseViewModel(
 
             _uiState.update {
                 it.copy(
-                    message = "Monthly budget saved",
+                    message = "Budget saved",
                     monthlyBudgetGoalInput = ""
                 )
             }
@@ -216,23 +210,20 @@ class ExpenseViewModel(
 
             _uiState.update {
                 it.copy(
-                    message = "Category limit saved",
+                    message = "Limit saved",
                     categoryBudgetLimitInput = ""
                 )
             }
         }
     }
 
+
     fun onPeriodFromDateChange(value: String) {
-        _uiState.update {
-            it.copy(periodFromDate = value)
-        }
+        _uiState.update { it.copy(periodFromDate = value) }
     }
 
     fun onPeriodToDateChange(value: String) {
-        _uiState.update {
-            it.copy(periodToDate = value)
-        }
+        _uiState.update { it.copy(periodToDate = value) }
     }
 
     fun loadCategoryTotalsForSelectedPeriod() {
@@ -240,21 +231,15 @@ class ExpenseViewModel(
         val to = _uiState.value.periodToDate
 
         if (from.isBlank() || to.isBlank()) {
-            sendSnackbar("Please select both dates")
+            sendSnackbar("Select dates")
             return
         }
 
         viewModelScope.launch {
-            try {
-                val totals = repository.getCategoryTotalsBetweenDates(from, to)
-                    .first() // convert Flow → List
+            val totals = repository.getCategoryTotalsBetweenDates(from, to).first()
 
-                _uiState.update {
-                    it.copy(categoryTotals = totals)
-                }
-
-            } catch (e: Exception) {
-                sendSnackbar("Failed to load totals: ${e.message}")
+            _uiState.update {
+                it.copy(categoryTotals = totals)
             }
         }
     }
@@ -264,21 +249,15 @@ class ExpenseViewModel(
         val to = _uiState.value.periodToDate
 
         if (from.isBlank() || to.isBlank()) {
-            sendSnackbar("Please select both dates")
+            sendSnackbar("Select dates")
             return
         }
 
         viewModelScope.launch {
-            try {
-                val expenses = repository.getExpensesBetweenDates(from, to)
-                    .first()
+            val list = repository.getExpensesBetweenDates(from, to).first()
 
-                _uiState.update {
-                    it.copy(filteredExpenses = expenses)
-                }
-
-            } catch (e: Exception) {
-                sendSnackbar("Failed to load expenses: ${e.message}")
+            _uiState.update {
+                it.copy(filteredExpenses = list)
             }
         }
     }

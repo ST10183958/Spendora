@@ -16,13 +16,13 @@ import com.menak.login.data.Entity.UserEntity
 
 @Database(
     entities = [
-        UserEntity::class,                 // ✅ FIX: REQUIRED
+        UserEntity::class,
         CategoryEntity::class,
         ExpenseEntity::class,
         BudgetGoalEntity::class,
         CategoryBudgetLimitEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -44,7 +44,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "app_database"
                 )
-                    // ⚠️ DEV ONLY (OK FOR NOW)
+
                     .fallbackToDestructiveMigration()
                     .build()
 

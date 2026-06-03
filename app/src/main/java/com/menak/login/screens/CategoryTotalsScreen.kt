@@ -18,7 +18,7 @@ fun CategoryTotalsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Map categories for quick lookup
+
     val categoryMap = uiState.categories.associateBy { it.id }
 
     Column(
@@ -43,7 +43,7 @@ fun CategoryTotalsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // TO DATE
+
         DatePickerField(
             label = "To Date",
             value = uiState.periodToDate,
@@ -70,7 +70,7 @@ fun CategoryTotalsScreen(
 
                     Row(modifier = Modifier.padding(12.dp)) {
 
-                        // ICON
+
                         if (!category?.iconUrl.isNullOrEmpty()) {
 
                             AndroidView(

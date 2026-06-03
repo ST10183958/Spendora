@@ -15,4 +15,7 @@ interface CategoryDao {
 
     @Query("SELECT * FROM categories ORDER BY id DESC")
     fun getAllCategories(): Flow<List<CategoryEntity>>
+
+    @Query("DELETE FROM categories")
+    suspend fun clearAll()
 }

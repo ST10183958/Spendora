@@ -50,7 +50,7 @@ fun AnalyticsScreen(
                 .verticalScroll(rememberScrollState())
         ) {
 
-            // ---------------- HEADER ----------------
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -84,14 +84,14 @@ fun AnalyticsScreen(
                 }
             }
 
-            // ---------------- CONTENT ----------------
+
             Column(
                 modifier = Modifier
                     .padding(20.dp)
                     .fillMaxWidth()
             ) {
 
-                // ---- STATS ----
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -111,7 +111,6 @@ fun AnalyticsScreen(
 
                 Spacer(Modifier.height(20.dp))
 
-                // ---- GOALS CARD ----
                 Card(
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     elevation = CardDefaults.cardElevation(4.dp)
@@ -142,7 +141,6 @@ fun AnalyticsScreen(
 
                         Spacer(Modifier.height(12.dp))
 
-                        // SAFE PROGRESS (FIXED)
                         val progress = safeProgress(
                             analytics.totalSpent,
                             analytics.maxGoal
@@ -169,7 +167,7 @@ fun AnalyticsScreen(
 
                 Spacer(Modifier.height(20.dp))
 
-                // ---- GOAL SCORE ----
+4
                 Card(
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     elevation = CardDefaults.cardElevation(4.dp)

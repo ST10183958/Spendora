@@ -52,15 +52,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.menak.login.screens.ViewModel.CurrencyViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BudgetScreen(
     viewModel: ExpenseViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    currencyVM : CurrencyViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
+    val selectedCurrency = currencyVM.currency.value
+
 
     val selectedCategoryName = uiState.categories
         .firstOrNull { it.id == uiState.selectedBudgetCategoryId }
@@ -162,7 +166,7 @@ fun BudgetScreen(
 
                     Text(
                         text = "Current Goal: ${
-                            uiState.budgetGoal?.monthlyTotalBudget?.let { "R %.2f".format(it) } ?: "Not set"
+                            uiState.budgetGoal?.monthlyTotalBudget?.let { "${selectedCurrency.symbol} %.2f".format(it) } ?: "Not set"
                         }",
                         color = Color(0xFF1A1A2E)
                     )
@@ -289,7 +293,7 @@ fun BudgetScreen(
                                 Spacer(modifier = Modifier.height(6.dp))
 
                                 Text(
-                                    text = "Monthly Limit: R %.2f".format(limit.monthlyLimit),
+                                    text = "Monthly Limit: ${selectedCurrency.symbol} %.2f".format(limit.monthlyLimit),
                                     color = Color(0xFF00BFA5),
                                     fontWeight = FontWeight.SemiBold
                                 )

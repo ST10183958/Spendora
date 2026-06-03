@@ -49,12 +49,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.menak.login.screens.ViewModel.CurrencyViewModel
 import com.menak.login.ui.components.DatePickerField
 
 @Composable
 fun ExpensePeriodListScreen(
     viewModel: ExpenseViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    currencyVM: CurrencyViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -193,7 +195,8 @@ fun ExpensePeriodListScreen(
                             startDate = expense.startDate,
                             endDate = expense.endDate,
                             description = expense.description,
-                            receiptPhotoUri = expense.receiptPhotoUrl
+                            receiptPhotoUri = expense.receiptPhotoUrl,
+                            currencyVM = currencyVM
                         )
                     }
                 }
@@ -247,8 +250,12 @@ private fun HistoryExpenseCard(
     startDate: String,
     endDate: String,
     description: String,
-    receiptPhotoUri: String
-) {
+    receiptPhotoUri: String,
+    currencyVM: CurrencyViewModel,
+
+    ) {
+    val selectedCurrency = currencyVM.currency.value
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -281,7 +288,7 @@ private fun HistoryExpenseCard(
                 }
 
                 Text(
-                    text = "R %.2f".format(amount),
+                    text = "${selectedCurrency.symbol} %.2f".format(amount),
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF00BFA5),
                     fontSize = 16.sp

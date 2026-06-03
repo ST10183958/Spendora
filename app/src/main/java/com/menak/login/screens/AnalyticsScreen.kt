@@ -42,13 +42,18 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.menak.login.screens.ViewModel.CurrencyViewModel
 
 @Composable
 fun AnalyticsScreen(
     navController: NavController,
-    viewModel: ExpenseViewModel
-) {
+    viewModel: ExpenseViewModel,
+    currencyVM: CurrencyViewModel,
+
+    ) {
     val analytics by viewModel.analyticsUiState.collectAsState()
+    val selectedCurrency = currencyVM.currency.value
+
 
     Box(
         modifier = Modifier
@@ -109,13 +114,13 @@ fun AnalyticsScreen(
                     AnalyticsStatCard(
                         modifier = Modifier.weight(1f),
                         title = "Total Spent",
-                        value = "R %.2f".format(analytics.totalSpent)
+                        value = "${selectedCurrency.symbol} %.2f".format(analytics.totalSpent)
                     )
 
                     AnalyticsStatCard(
                         modifier = Modifier.weight(1f),
                         title = "Daily Avg",
-                        value = "R %.2f".format(analytics.dailyAverage)
+                        value = "${selectedCurrency.symbol} %.2f".format(analytics.dailyAverage)
                     )
                 }
 
@@ -177,13 +182,17 @@ fun AnalyticsScreen(
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.weight(1f)) {
                                 leftItems.forEach { item ->
-                                    AnalyticsLegendItem(item)
+                                    AnalyticsLegendItem(item,
+                                        currencyVM = currencyVM
+                                    )
                                 }
                             }
 
                             Column(modifier = Modifier.weight(1f)) {
                                 rightItems.forEach { item ->
-                                    AnalyticsLegendItem(item)
+                                    AnalyticsLegendItem(item,
+                                        currencyVM = currencyVM
+                                    )
                                 }
                             }
                         }
@@ -258,7 +267,7 @@ fun AnalyticsScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("This Month", color = Color(0xFFB2DFDB))
                                 Text(
-                                    "R %.2f".format(analytics.thisMonthTotal),
+                                    "${selectedCurrency.symbol} %.2f".format(analytics.thisMonthTotal),
                                     color = Color.White
                                 )
                             }
@@ -266,7 +275,7 @@ fun AnalyticsScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Last Month", color = Color(0xFFB2DFDB))
                                 Text(
-                                    "R %.2f".format(analytics.lastMonthTotal),
+                                    "${selectedCurrency.symbol} %.2f".format(analytics.lastMonthTotal),
                                     color = Color.White
                                 )
                             }
@@ -284,8 +293,9 @@ fun AnalyticsScreen(
 private fun AnalyticsStatCard(
     modifier: Modifier = Modifier,
     title: String,
-    value: String
+    value: String,
 ) {
+
     Card(
         modifier = modifier.height(100.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF00BFA5)),
@@ -310,11 +320,16 @@ private fun AnalyticsStatCard(
 }
 
 @Composable
-private fun AnalyticsLegendItem(item: CategoryAnalyticsItem) {
+private fun AnalyticsLegendItem(
+    item: CategoryAnalyticsItem,
+    currencyVM: CurrencyViewModel
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(bottom = 6.dp)
     ) {
+        val selectedCurrency = currencyVM.currency.value
+
         Box(
             modifier = Modifier
                 .size(8.dp)
@@ -324,7 +339,7 @@ private fun AnalyticsLegendItem(item: CategoryAnalyticsItem) {
         Spacer(modifier = Modifier.width(6.dp))
 
         Text(
-            text = "${item.name}   R %.0f".format(item.amount),
+            text = "${item.name} ${selectedCurrency.symbol} %.0f".format(item.amount),
             color = Color(item.color),
             fontSize = 13.sp
         )

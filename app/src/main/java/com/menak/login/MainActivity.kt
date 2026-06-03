@@ -9,9 +9,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.menak.login.data.AppDatabase
 import com.menak.login.data.Repository.AuthRepository
+import com.menak.login.data.Repository.CurrencyManagerRepository
 import com.menak.login.data.Repository.ExpenseRepository
 import com.menak.login.navigation.AppNavGraph
 import com.menak.login.navigation.AuthNavGraph
+import com.menak.login.screens.ViewModel.CurrencyViewModel
+import com.menak.login.screens.ViewModel.CurrencyViewModelFactory
 import com.menak.login.screens.ViewModel.SettingsViewModel
 import com.menak.login.ui.AuthViewModel
 import com.menak.login.ui.AuthViewModelFactory
@@ -36,6 +39,12 @@ class MainActivity : ComponentActivity() {
         )
         val expenseFactory = ExpenseViewModelFactory(expenseRepository)
 
+        val currencyRepository = CurrencyManagerRepository(applicationContext)
+
+        val currencyFactory = CurrencyViewModelFactory(currencyRepository)
+
+
+
 
 
         setContent  {
@@ -47,6 +56,9 @@ class MainActivity : ComponentActivity() {
 
                 val settingsVm: SettingsViewModel = viewModel()
                 val darkMode by settingsVm.darkMode.collectAsState()
+
+            val currencyVM: CurrencyViewModel =
+                viewModel(factory = currencyFactory)
 
 
 
@@ -60,6 +72,7 @@ class MainActivity : ComponentActivity() {
                         navController = appNavController,
                         viewModel = expenseViewModel,
                         settingsVM = settingsVm,
+                        currencyVM = currencyVM,
                         username = authUiState.loggedInUsername,
                         onLogout = { authViewModel.logout() }
                     )

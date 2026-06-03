@@ -5,7 +5,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.menak.login.data.Repository.CurrencyManagerRepository
+import com.menak.login.screens.CurrencySettingsScreen
 import com.menak.login.screens.SettingsScreen
+import com.menak.login.screens.ViewModel.CurrencyViewModel
 import com.menak.login.screens.ViewModel.SettingsViewModel
 import com.menak.login.ui.AddCategoryScreen
 import com.menak.login.ui.AddExpenseScreen
@@ -21,6 +24,7 @@ fun AppNavGraph(
     navController: NavHostController,
     viewModel: ExpenseViewModel,
     settingsVM: SettingsViewModel,
+    currencyVM : CurrencyViewModel,
     username: String,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
@@ -35,6 +39,7 @@ fun AppNavGraph(
                 username = username,
                 navController = navController,
                 viewModel = viewModel,
+                currencyVM = currencyVM,
                 onLogout = onLogout
             )
         }
@@ -75,7 +80,15 @@ fun AppNavGraph(
         composable("analytics_screen") {
             AnalyticsScreen(
                 navController = navController,
-                viewModel = viewModel
+                viewModel = viewModel,
+                currencyVM = currencyVM
+            )
+        }
+
+        composable("currency_settings") {
+            CurrencySettingsScreen(
+                navController = navController,
+                currencyVM = currencyVM
             )
         }
 

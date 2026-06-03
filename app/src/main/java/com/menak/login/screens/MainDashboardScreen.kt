@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.menak.login.R
 import com.menak.login.navigation.Routes
+import com.menak.login.screens.ViewModel.CurrencyViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.max
 
@@ -71,6 +72,8 @@ object DashboardRoutes {
     const val ANALYTICS = "analytics_screen"
     const val BUDGET = "budget_screen"
 
+    const val CURRENCY_SETTINGS = "currency_settings"
+
     const val SETTINGS = "settings_screen"
 
     const val CATEGORY_TOTALS = "category_totals"
@@ -82,11 +85,14 @@ fun MainDashboardScreen(
     username: String,
     navController: NavController,
     viewModel: ExpenseViewModel,
+    currencyVM: CurrencyViewModel,
+
     onLogout: () -> Unit
 ) {
 
     //Adam, E. 2026
     val uiState by viewModel.uiState.collectAsState()
+    val selectedCurrency = currencyVM.currency.value
     val drawerState = rememberDrawerState(androidx.compose.material3.DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -175,6 +181,16 @@ fun MainDashboardScreen(
                     onClick = {
                         scope.launch { drawerState.close() }
                         navController.navigate(DashboardRoutes.BUDGET)
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+
+                NavigationDrawerItem(
+                    label = { Text("Currency Settings") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate(DashboardRoutes.CURRENCY_SETTINGS)
                     },
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )
@@ -350,7 +366,7 @@ fun MainDashboardScreen(
                                 }
 
                                 Text(
-                                    "R %.2f".format(uiState.monthlyBudgetAmount),
+                                    "${selectedCurrency.symbol} %.2f".format(uiState.monthlyBudgetAmount),
                                     fontSize = 18.sp
                                 )
                             }
@@ -377,12 +393,12 @@ fun MainDashboardScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    "Spent: R %.2f".format(uiState.monthlySpentAmount),
+                                    "Spent: ${selectedCurrency.symbol} %.2f".format(uiState.monthlySpentAmount),
                                     color = Color.Red
                                 )
 
                                 Text(
-                                    "Remaining: R %.2f".format(max(uiState.monthlyRemainingAmount, 0.0)),
+                                    "Remaining: ${selectedCurrency.symbol} %.2f".format(max(uiState.monthlyRemainingAmount, 0.0)),
                                     color = Color(0xFF00A896)
                                 )
                             }
@@ -415,7 +431,8 @@ fun MainDashboardScreen(
                             title = item.categoryName,
                             spentAmount = item.spentAmount,
                             remainingAmount = item.remainingAmount,
-                            progress = item.progress
+                            progress = item.progress,
+                            currencyVM = currencyVM
                         )
                     }
 
@@ -441,8 +458,12 @@ fun CategorySpendingDashboardCard(
     title: String,
     spentAmount: Double,
     remainingAmount: Double?,
-    progress: Float
-) {
+    progress: Float,
+    currencyVM: CurrencyViewModel,
+
+    ) {
+    val selectedCurrency = currencyVM.currency.value
+
     Card(
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(4.dp),
@@ -458,9 +479,9 @@ fun CategorySpendingDashboardCard(
                 Text(title)
 
                 if (remainingAmount != null) {
-                    Text("R %.2f left".format(max(remainingAmount, 0.0)))
+                    Text("${selectedCurrency.symbol} %.2f left".format(max(remainingAmount, 0.0)))
                 } else {
-                    Text("R %.2f spent".format(spentAmount))
+                    Text("${selectedCurrency.symbol} %.2f spent".format(spentAmount))
                 }
             }
 
@@ -476,7 +497,7 @@ fun CategorySpendingDashboardCard(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            Text("Spent: R %.2f".format(spentAmount), color = Color(0xFF00A896))
+            Text("Spent: ${selectedCurrency.symbol} %.2f".format(spentAmount), color = Color(0xFF00A896))
         }
     }
 }

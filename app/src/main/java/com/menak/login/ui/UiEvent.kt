@@ -1,6 +1,6 @@
 package com.menak.login.ui
 
-sealed class UiEvent {
+sealed class UiEventf {
 
     data class ShowSnackbar(
         val message: String

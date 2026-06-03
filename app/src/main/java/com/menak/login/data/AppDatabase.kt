@@ -16,15 +16,15 @@ import com.menak.login.data.Entity.UserEntity
 
 @Database(
     entities = [
+        UserEntity::class,                 // ✅ FIX: REQUIRED
         CategoryEntity::class,
         ExpenseEntity::class,
         BudgetGoalEntity::class,
         CategoryBudgetLimitEntity::class
     ],
-    version = 4,
+    version = 6,
     exportSchema = false
 )
-
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
@@ -33,6 +33,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun budgetDao(): BudgetDao
 
     companion object {
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -43,6 +44,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "app_database"
                 )
+                    // ⚠️ DEV ONLY (OK FOR NOW)
                     .fallbackToDestructiveMigration()
                     .build()
 

@@ -62,6 +62,8 @@ fun AddExpenseScreen(
                         message = event.message
                     )
                 }
+
+                else -> {}
             }
         }
     }

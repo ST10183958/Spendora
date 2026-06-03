@@ -3,6 +3,7 @@ package com.menak.login.ui
 import com.menak.login.data.Entity.BudgetGoalEntity
 import com.menak.login.data.Entity.CategoryBudgetLimitEntity
 import com.menak.login.data.Entity.CategoryEntity
+import com.menak.login.data.Entity.CategorySpendingTotal
 import com.menak.login.data.Entity.CategoryTotal
 import com.menak.login.data.Entity.ExpenseEntity
 
@@ -40,8 +41,7 @@ data class ExpenseUiState(
     val filteredExpenses: List<ExpenseEntity> = emptyList(),
 
     // ✅ FIXED LINE
-    val categoryTotals: List<CategoryTotal> = emptyList(),
-
+    val categoryTotals: List<CategorySpendingTotal> = emptyList(),
     val budgetGoal: BudgetGoalEntity? = null,
     val categoryBudgetLimits: List<CategoryBudgetLimitEntity> = emptyList(),
 

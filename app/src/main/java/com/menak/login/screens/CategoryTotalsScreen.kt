@@ -18,7 +18,7 @@ fun CategoryTotalsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Map categories for lookup (IMPORTANT FIX)
+    // Map categories for quick lookup
     val categoryMap = uiState.categories.associateBy { it.id }
 
     Column(
@@ -34,18 +34,20 @@ fun CategoryTotalsScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // FROM DATE
         DatePickerField(
             label = "From Date",
             value = uiState.periodFromDate,
-            onDateSelected = viewModel::onPeriodFromDateChange
+            onDateSelected = { viewModel.onPeriodFromDateChange(it) }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // TO DATE
         DatePickerField(
             label = "To Date",
             value = uiState.periodToDate,
-            onDateSelected = viewModel::onPeriodToDateChange
+            onDateSelected = { viewModel.onPeriodToDateChange(it) }
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -70,6 +72,7 @@ fun CategoryTotalsScreen(
 
                         // ICON
                         if (!category?.iconUrl.isNullOrEmpty()) {
+
                             AndroidView(
                                 modifier = Modifier.size(48.dp),
                                 factory = { context ->
@@ -81,9 +84,7 @@ fun CategoryTotalsScreen(
                                 },
                                 update = { imageView ->
                                     try {
-                                        imageView.setImageURI(
-                                            Uri.parse(category?.iconUrl)
-                                        )
+                                        imageView.setImageURI(Uri.parse(category?.iconUrl))
                                     } catch (_: Exception) {
                                         imageView.setImageDrawable(null)
                                     }
@@ -93,8 +94,8 @@ fun CategoryTotalsScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                         }
 
-                        // TEXT
                         Column {
+
                             Text(
                                 text = "Category: ${category?.type ?: "Unknown"}"
                             )

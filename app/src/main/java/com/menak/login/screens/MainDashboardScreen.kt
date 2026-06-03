@@ -2,51 +2,16 @@ package com.menak.login.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Analytics
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -57,22 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.menak.login.R
-import kotlinx.coroutines.launch
 import kotlin.math.max
-
-
-
-//Adam, E. 2026
-object DashboardRoutes {
-    const val DASHBOARD = "expense_home"
-    const val CATEGORIES = "add_category"
-    const val ADD_EXPENSE = "add_expense"
-    const val HISTORY = "expense_period_list"
-    const val ANALYTICS = "analytics_screen"
-    const val BUDGET = "budget_screen"
-
-    const val CATEGORY_TOTALS = "category_totals"
-}
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,451 +34,280 @@ fun MainDashboardScreen(
     onLogout: () -> Unit
 ) {
 
-    //Adam, E. 2026
     val uiState by viewModel.uiState.collectAsState()
-    val drawerState = rememberDrawerState(androidx.compose.material3.DrawerValue.Closed)
+
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    //Adam, E. 2026
+    fun safeProgress(spent: Double, budget: Double): Float {
+        if (budget <= 0.0 || spent.isNaN() || budget.isNaN()) return 0f
+        return (spent / budget).toFloat().coerceIn(0f, 1f)
+    }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = true,
         drawerContent = {
-            ModalDrawerSheet(
-                drawerContainerColor = Color.White
-            ) {
+            ModalDrawerSheet {
+
                 Text(
                     "Spendora Menu",
-                    style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(16.dp),
+                    fontSize = 18.sp,
                     color = Color(0xFF00A896)
                 )
 
-                Text(
-                    "Welcome, $username",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    color = Color(0xFF00A896)
-                )
+                Spacer(Modifier.height(8.dp))
 
-                //Adam, E. 2026
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-                //Adam, E. 2026
-                NavigationDrawerItem(
-                    label = { Text("Dashboard") },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate(DashboardRoutes.DASHBOARD) {
-                            popUpTo(DashboardRoutes.DASHBOARD) { inclusive = true }
-                            launchSingleTop = true
-                        }
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-                //Adam, E. 2026
-                NavigationDrawerItem(
-                    label = { Text("Categories") },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate(DashboardRoutes.CATEGORIES)
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-                //Adam, E. 2026
                 NavigationDrawerItem(
                     label = { Text("Add Expense") },
                     selected = false,
                     onClick = {
+                        navController.navigate("add_expense")
                         scope.launch { drawerState.close() }
-                        navController.navigate(DashboardRoutes.ADD_EXPENSE)
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    }
                 )
-                //Adam, E. 2026
+
                 NavigationDrawerItem(
-                    label = { Text("History") },
+                    label = { Text("Add Category") },
                     selected = false,
                     onClick = {
+                        navController.navigate("add_category")
                         scope.launch { drawerState.close() }
-                        navController.navigate(DashboardRoutes.HISTORY)
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    }
                 )
-                //Adam, E. 2026
+
+                NavigationDrawerItem(
+                    label = { Text("Budget") },
+                    selected = false,
+                    onClick = {
+                        navController.navigate("budget_screen")
+                        scope.launch { drawerState.close() }
+                    }
+                )
+
                 NavigationDrawerItem(
                     label = { Text("Analytics") },
                     selected = false,
                     onClick = {
+                        navController.navigate("analytics_screen")
                         scope.launch { drawerState.close() }
-                        navController.navigate(DashboardRoutes.ANALYTICS)
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    }
                 )
-                //Adam, E. 2026
+
                 NavigationDrawerItem(
-                    label = { Text("Budget Settings") },
+                    label = { Text("History") },
                     selected = false,
                     onClick = {
+                        navController.navigate("expense_period_list")
                         scope.launch { drawerState.close() }
-                        navController.navigate(DashboardRoutes.BUDGET)
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    }
                 )
 
-                //Adam, E. 2026
-                HorizontalDivider(modifier = Modifier.padding(16.dp))
+                Spacer(Modifier.height(20.dp))
 
-                //Adam, E. 2026
                 NavigationDrawerItem(
                     label = { Text("Logout") },
                     selected = false,
                     onClick = {
-                        scope.launch { drawerState.close() }
                         onLogout()
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    colors = androidx.compose.material3.NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color(0xFFFFCDD2),
-                        unselectedTextColor = Color(0xFFD32F2F)
-                    )
+                    }
                 )
             }
         }
     ) {
 
-        //Adam, E. 2026
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = { Text("Spendora", color = Color.White) },
                     navigationIcon = {
-                        androidx.compose.material3.IconButton(
-                            onClick = { scope.launch { drawerState.open() } }
-                        ) {
-                            Icon(Icons.Default.List, contentDescription = "Menu", tint = Color.White)
+                        IconButton(onClick = {
+                            scope.launch { drawerState.open() }
+                        }) {
+                            Icon(
+                                Icons.Default.Menu,
+                                contentDescription = "Menu",
+                                tint = Color.White
+                            )
                         }
                     },
-                    //Android Develops, (n.d)
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color(0xFF00A896)
                     )
                 )
             },
 
-            //Android Develops, (n.d)
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { navController.navigate(DashboardRoutes.ADD_EXPENSE) },
+                    onClick = { navController.navigate("add_expense") },
                     containerColor = Color(0xFF00A896)
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Expense")
-                }
-            },
-
-            //Android Develops, (n.d)
-            bottomBar = {
-                NavigationBar(
-                    containerColor = Color.White,
-                    tonalElevation = 8.dp
-                ) {
-                    //Android Develops, (n.d)
-                    NavigationBarItem(
-                        selected = true,
-                        onClick = {},
-                        icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                        label = { Text("Home") }
-                    )
-                    //Android Develops, (n.d)
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = { navController.navigate(DashboardRoutes.CATEGORIES) },
-                        icon = { Icon(Icons.Default.List, contentDescription = "Categories") },
-                        label = { Text("Categories") }
-                    )
-                    //Android Develops, (n.d)
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = { navController.navigate(DashboardRoutes.HISTORY) },
-                        icon = { Icon(Icons.Default.History, contentDescription = "History") },
-                        label = { Text("History") }
-                    )
-                    //Android Develops, (n.d)
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = { navController.navigate(DashboardRoutes.ANALYTICS) },
-                        icon = { Icon(Icons.Default.Analytics, contentDescription = "Analytics") },
-                        label = { Text("Analytics") }
-                    )
+                    Icon(Icons.Default.Add, contentDescription = null)
                 }
             }
-        ) { paddingValues ->
-            // Main content with scroll
+        ) { padding ->
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color(0xFFF2F2F2))
                     .verticalScroll(rememberScrollState())
-                    .padding(paddingValues)
+                    .padding(padding)
             ) {
 
+                // ---------------- HEADER ----------------
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
-                        .background(Color(0xFF00A896))
+                        .background(Color(0xFF00A896)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
                         Box(
                             modifier = Modifier
-                                .size(90.dp)
-                                .shadow(8.dp, CircleShape)
-                                .background(Color(0xFF00A896), CircleShape),
+                                .size(80.dp)
+                                .shadow(6.dp, CircleShape)
+                                .background(Color.White, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.spendora_logo),
-                                contentDescription = "Spendora Logo",
-                                modifier = Modifier.size(45.dp)
+                                contentDescription = null,
+                                modifier = Modifier.size(40.dp)
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(Modifier.height(10.dp))
 
                         Text(
-                            "Welcome back, $username!",
+                            "Welcome, $username",
                             color = Color.White,
                             fontSize = 14.sp
                         )
 
                         Text(
-                            "Your Budget Overview",
+                            "Budget Overview",
                             color = Color.White,
-                            fontSize = 20.sp
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
 
-                Column(
+                // ---------------- BUDGET CARD ----------------
+                Card(
                     modifier = Modifier
                         .padding(16.dp)
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(6.dp)
                 ) {
 
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        elevation = CardDefaults.cardElevation(6.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    Text(uiState.currentMonthLabel, fontSize = 12.sp)
-                                    Text("Monthly Budget", fontSize = 18.sp)
-                                }
+                    Column(Modifier.padding(16.dp)) {
 
-                                Text(
-                                    "R %.2f".format(uiState.monthlyBudgetAmount),
-                                    fontSize = 18.sp
-                                )
-                            }
+                        Text("Monthly Budget", fontSize = 16.sp)
 
-                            Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(Modifier.height(8.dp))
 
-                            val monthlyProgress = when {
-                                uiState.monthlyBudgetAmount > 0.0 -> (uiState.monthlySpentAmount / uiState.monthlyBudgetAmount).toFloat().coerceIn(0f, 1f)
-                                else -> 0f
-                            }
+                        Text(
+                            "R %.2f".format(uiState.monthlyBudgetAmount),
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
 
-                            LinearProgressIndicator(
-                                progress = { monthlyProgress },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp),
-                                color = Color(0xFF00A896)
+                        Spacer(Modifier.height(12.dp))
+
+                        val progress = safeProgress(
+                            uiState.monthlySpentAmount,
+                            uiState.monthlyBudgetAmount
+                        )
+
+                        LinearProgressIndicator(
+                            progress = progress,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp),
+                            color = Color(0xFF00A896)
+                        )
+
+                        Spacer(Modifier.height(12.dp))
+
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                "Spent: R %.2f".format(uiState.monthlySpentAmount),
+                                color = Color.Red
                             )
-
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    "Spent: R %.2f".format(uiState.monthlySpentAmount),
-                                    color = Color.Red
-                                )
-
-                                Text(
-                                    "Remaining: R %.2f".format(max(uiState.monthlyRemainingAmount, 0.0)),
-                                    color = Color(0xFF00A896)
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    val analytics by viewModel.analyticsUiState.collectAsState()
-
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(4.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
 
                             Text(
-                                text = "Goal Performance Over Time",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1A1A2E)
+                                "Remaining: R %.2f".format(
+                                    max(uiState.monthlyRemainingAmount, 0.0)
+                                ),
+                                color = Color(0xFF00A896)
                             )
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            // FIXED SAFE LIST ITERATION
-                            analytics.goalHistory.forEach { item ->
-
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = item.month,
-                                        color = Color.DarkGray
-                                    )
-
-                                    Text(
-                                        text = "${item.score.toInt()}%",
-                                        color = if (item.score >= 70)
-                                            Color(0xFF00C853)
-                                        else
-                                            Color(0xFFFF5252)
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(6.dp))
-
-                                LinearProgressIndicator(
-                                    progress = ((item.score / 100.0).toFloat()).coerceIn(0f, 1f),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = if (item.score >= 70.0)
-                                        Color(0xFF00C853)
-                                    else
-                                        Color(0xFFFF5252)
-                                )
-
-                                Spacer(modifier = Modifier.height(10.dp))
-                            }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(
-                        onClick = { navController.navigate(DashboardRoutes.BUDGET) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp),
-                        shape = RoundedCornerShape(30.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF00A896)
-                        )
-                    ) {
-                        Text("Set Budget Goal", color = Color.White)
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    Text("Category Spending", fontSize = 18.sp)
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    uiState.dashboardCategorySpending.forEach { item ->
-                        CategorySpendingDashboardCard(
-                            title = item.categoryName,
-                            spentAmount = item.spentAmount,
-                            remainingAmount = item.remainingAmount,
-                            progress = item.progress
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    OutlinedButton(
-                        onClick = { navController.navigate(DashboardRoutes.CATEGORIES) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(30.dp)
-                    ) {
-                        Text("+ Add New Category")
-                    }
-
-                    Spacer(modifier = Modifier.height(100.dp))
                 }
+
+                // ---------------- CATEGORY ----------------
+                Text(
+                    "Category Spending",
+                    modifier = Modifier.padding(start = 16.dp),
+                    fontSize = 16.sp
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                uiState.dashboardCategorySpending.forEach { item ->
+
+                    CategorySpendingDashboardCard(
+                        title = item.categoryName,
+                        spentAmount = item.spentAmount,
+                        remainingAmount = item.remainingAmount ?: 0.0,
+                        progress = item.progress.coerceIn(0f, 1f)
+                    )
+                }
+
+                Spacer(Modifier.height(80.dp))
             }
         }
     }
 }
 
+// ---------------- CARD ----------------
 @Composable
 fun CategorySpendingDashboardCard(
     title: String,
     spentAmount: Double,
-    remainingAmount: Double?,
+    remainingAmount: Double,
     progress: Float
 ) {
     Card(
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
+
         Column(modifier = Modifier.padding(12.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(title)
 
-                if (remainingAmount != null) {
-                    Text("R %.2f left".format(max(remainingAmount, 0.0)))
-                } else {
-                    Text("R %.2f spent".format(spentAmount))
-                }
-            }
+            Text(title, fontWeight = FontWeight.Bold)
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(Modifier.height(4.dp))
 
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp),
-                color = Color(0xFF00A896)
-            )
+            Text("Spent: R$spentAmount")
+            Text("Remaining: R$remainingAmount")
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(Modifier.height(8.dp))
 
-            Text("Spent: R %.2f".format(spentAmount), color = Color(0xFF00A896))
+            LinearProgressIndicator(progress = progress)
         }
     }
 }
-
 
 //Title: Androidx.compose.material3
 //Author: Android Develops

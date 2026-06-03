@@ -8,8 +8,6 @@ import com.menak.login.data.Entity.BudgetGoalEntity
 import com.menak.login.data.Entity.CategoryBudgetLimitEntity
 import com.menak.login.data.Entity.CategoryEntity
 import com.menak.login.data.Entity.ExpenseEntity
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.runBlocking
 
 class ExpenseRepository(
     private val categoryDao: CategoryDao,
@@ -18,90 +16,74 @@ class ExpenseRepository(
     private val firestore: FirebaseFirestore
 ) {
 
-    // -------------------------
-    // Categories
-    // -------------------------
-    fun getAllCategories(): Flow<List<CategoryEntity>> =
+    // ---------------- CATEGORY ----------------
+
+    suspend fun addCategory(type: String, iconUrl: String) {
+        val category = CategoryEntity(
+            type = type,
+            iconUrl = iconUrl
+        )
+
+        categoryDao.insert(category)
+
+        firestore.collection("categories")
+            .add(
+                mapOf(
+                    "type" to type,
+                    "iconUrl" to iconUrl
+                )
+            )
+    }
+
+    fun getAllCategories() =
         categoryDao.getAllCategories()
 
-    fun addCategory(type: String, iconUrl: String) {
-        runBlocking {
-            categoryDao.insert(
-                CategoryEntity(
-                    type = type,
-                    iconUrl = iconUrl
+    // ---------------- EXPENSE ----------------
+
+    suspend fun addExpense(expense: ExpenseEntity) {
+        expenseDao.insert(expense)
+
+        firestore.collection("expenses")
+            .add(
+                mapOf(
+                    "name" to expense.name,
+                    "categoryId" to expense.categoryId,
+                    "amount" to expense.amount,
+                    "startDate" to expense.startDate,
+                    "endDate" to expense.endDate,
+                    "description" to expense.description,
+                    "expenseIconUrl" to expense.expenseIconUrl,
+                    "receiptPhotoUrl" to expense.receiptPhotoUrl
                 )
             )
-        }
     }
 
-    // -------------------------
-    // Expenses
-    // -------------------------
-    fun getAllExpenses(): Flow<List<ExpenseEntity>> =
+    fun getAllExpenses() =
         expenseDao.getAllExpenses()
 
-    fun addExpense(
-        name: String,
-        categoryId: Int,
-        amount: Double,
-        startDate: String,
-        endDate: String,
-        description: String,
-        expenseIconUri: String,
-        receiptPhotoUrl: String
-    ) {
-        runBlocking {
-            expenseDao.insert(
-                ExpenseEntity(
-                    name = name,
-                    categoryId = categoryId,
-                    amount = amount,
-                    startDate = startDate,
-                    endDate = endDate,
-                    description = description,
-                    expenseIconUri = expenseIconUri,
-                    receiptPhotoUrl = receiptPhotoUrl
-                )
-            )
-        }
-    }
-
-    fun getExpensesBetweenDates(from: String, to: String): Flow<List<ExpenseEntity>> =
+    fun getExpensesBetweenDates(from: String, to: String) =
         expenseDao.getExpensesBetweenDates(from, to)
 
-    // -------------------------
-    // Budget
-    // -------------------------
-    fun getBudgetGoal() =
-        budgetDao.getBudgetGoal()
-
-    fun getAllCategoryBudgetLimits() =
-        budgetDao.getAllCategoryBudgetLimits()
-
-    fun saveMonthlyBudgetGoal(amount: Double) {
-        runBlocking {
-            budgetDao.upsertBudgetGoal(
-                BudgetGoalEntity(
-                    id = 1,
-                    monthlyTotalBudget = amount
-                )
-            )
-        }
-    }
-
-    fun saveCategoryBudgetLimit(categoryId: Int, limit: Double) {
-        runBlocking {
-            budgetDao.upsertCategoryBudgetLimit(
-                CategoryBudgetLimitEntity(
-                    id = 0,
-                    categoryId = categoryId,
-                    monthlyLimit = limit
-                )
-            )
-        }
-    }
-
     fun getCategoryTotalsBetweenDates(from: String, to: String) =
-        budgetDao.getCategoryTotalsBetweenDates(from, to)
+        expenseDao.getCategoryTotalsBetweenDates(from, to)
+
+    // ---------------- BUDGET ----------------
+
+    suspend fun saveMonthlyBudgetGoal(monthlyTotalBudget: Double) {
+        budgetDao.upsertBudgetGoal(
+            BudgetGoalEntity(
+                id = 1,
+                monthlyTotalBudget = monthlyTotalBudget
+            )
+        )
+    }
+
+    suspend fun saveCategoryBudgetLimit(categoryId: Int, limit: Double) {
+        budgetDao.upsertCategoryBudgetLimit(
+            CategoryBudgetLimitEntity(
+                categoryId = categoryId,
+                monthlyLimit = limit
+            )
+        )
+    }
 }

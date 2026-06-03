@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.menak.login.data.Entity.CategoryEntity
+import com.menak.login.data.Entity.CategoryTotal
 import com.menak.login.data.Entity.ExpenseEntity
 import com.menak.login.data.Repository.ExpenseRepository
 import com.menak.login.ui.ExpenseUiState
@@ -70,7 +71,7 @@ class ExpenseViewModel(
                 val monthlySpent = monthExpenses.sumOf { expense -> expense.amount }
                 val monthlyRemaining = monthlyBudget - monthlySpent
 
-                val dashboardCategoryItems = categories.map { category ->
+                val dashboardCategoryItems = categories.map {category ->
                     val spent = monthExpenses
                         .filter { expense -> expense.categoryId == category.id }
                         .sumOf { expense -> expense.amount }
@@ -440,9 +441,13 @@ class ExpenseViewModel(
 
         categoryTotalsJob?.cancel()
         categoryTotalsJob = viewModelScope.launch {
-            repository.getCategoryTotalsBetweenDates(from, to).collect { totals ->
-                _uiState.value = _uiState.value.copy(categoryTotals = totals)
-            }
+            repository.getCategoryTotalsBetweenDates(from, to)
+                .collect { totals: List<CategoryTotal> ->
+
+                    _uiState.value = _uiState.value.copy(
+                        categoryTotals = totals
+                    )
+                }
         }
     }
 

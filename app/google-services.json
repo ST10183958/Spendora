@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "520935300582",
+    "project_id": "spendora-7cb15",
+    "storage_bucket": "spendora-7cb15.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:520935300582:android:c55ced97554afd6776ca27",
+        "android_client_info": {
+          "package_name": "com.menak.login"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrKUjrReOOeHD7vysS3_RlisdEGSvf15E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

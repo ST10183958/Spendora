@@ -16,15 +16,18 @@ import java.sql.Date
         )
     ]
 )
+
+
 data class ExpenseEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val expenseName: String,
+
+    val name: String,
     val categoryId: Int,
     val amount: Double,
     val startDate: String,
     val endDate: String,
     val description: String,
-    val expenseIconUrl: String,
+    val expenseIconUri: String,
     val receiptPhotoUrl: String
 )

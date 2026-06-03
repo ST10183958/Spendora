@@ -288,7 +288,7 @@ fun ExpensePeriodListScreen(
                             category?.type ?: "Unknown"
 
                         HistoryExpenseCard(
-                            expenseName = expense.expenseName,
+                            expenseName = expense.name,
                             categoryName = categoryName,
                             amount = expense.amount,
                             startDate = expense.startDate,

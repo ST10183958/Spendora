@@ -5,11 +5,7 @@ import android.widget.ImageView
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -22,11 +18,15 @@ fun CategoryTotalsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    // Map categories for lookup (IMPORTANT FIX)
+    val categoryMap = uiState.categories.associateBy { it.id }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
+
         Text(
             text = "Category Totals by Period",
             style = MaterialTheme.typography.headlineMedium
@@ -61,20 +61,29 @@ fun CategoryTotalsScreen(
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(uiState.categoryTotals) { total ->
+
+                val category = categoryMap[total.categoryId]
+
                 Card(modifier = Modifier.fillMaxWidth()) {
+
                     Row(modifier = Modifier.padding(12.dp)) {
-                        if (total.categoryIconUrl.isNotEmpty()) {
+
+                        // ICON
+                        if (!category?.iconUrl.isNullOrEmpty()) {
                             AndroidView(
                                 modifier = Modifier.size(48.dp),
                                 factory = { context ->
                                     ImageView(context).apply {
-                                        layoutParams = android.view.ViewGroup.LayoutParams(120, 120)
+                                        layoutParams =
+                                            android.view.ViewGroup.LayoutParams(120, 120)
                                         scaleType = ImageView.ScaleType.CENTER_CROP
                                     }
                                 },
                                 update = { imageView ->
                                     try {
-                                        imageView.setImageURI(Uri.parse(total.categoryIconUrl))
+                                        imageView.setImageURI(
+                                            Uri.parse(category?.iconUrl)
+                                        )
                                     } catch (_: Exception) {
                                         imageView.setImageDrawable(null)
                                     }
@@ -84,9 +93,15 @@ fun CategoryTotalsScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                         }
 
+                        // TEXT
                         Column {
-                            Text("Category: ${total.categoryType}")
-                            Text("Total Spent: R %.2f".format(total.totalSpent))
+                            Text(
+                                text = "Category: ${category?.type ?: "Unknown"}"
+                            )
+
+                            Text(
+                                text = "Total Spent: R %.2f".format(total.total)
+                            )
                         }
                     }
                 }

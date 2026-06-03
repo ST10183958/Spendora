@@ -2,31 +2,23 @@ package com.menak.login.data.Repository
 
 import com.menak.login.data.Dao.UserDao
 import com.menak.login.data.Entity.UserEntity
+import com.menak.login.data.firebase.FirebaseAuthRepository
+import com.menak.login.data.firebase.FirestoreRepository
 
-class AuthRepository(private val userDao: UserDao) {
+class AuthRepository(
+    private val firebase: FirebaseAuthRepository,
+    private val firestore: FirestoreRepository
+) {
 
     suspend fun register(username: String, password: String): Result<String> {
-        val existingUser = userDao.getUserByUsername(username)
-
-        return if (existingUser != null) {
-            Result.failure(Exception("Username already exists"))
-        } else {
-            userDao.insertUser(
-                UserEntity(
-                    username = username,
-                    password = password
-                )
-            )
-            Result.success("Registration successful")
+        return firebase.register(username, password).onSuccess {
+            firestore.createUserProfile(username)
         }
     }
 
-    suspend fun login(username: String, password: String): Result<UserEntity> {
-        val user = userDao.login(username, password)
-        return if (user != null) {
-            Result.success(user)
-        } else {
-            Result.failure(Exception("Invalid username or password"))
-        }
+    suspend fun login(username: String, password: String): Result<String> {
+        return firebase.login(username, password)
     }
+
+    fun logout() = firebase.logout()
 }

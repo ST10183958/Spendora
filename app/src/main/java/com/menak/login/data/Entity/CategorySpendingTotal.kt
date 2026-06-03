@@ -1,6 +1,6 @@
 package com.menak.login.data.Entity
 
-data class CategorySpendingTotal(
+data class ategorySpendingTotal(
     val categoryId: Int,
     val categoryType: String,
     val categoryIconUrl: String,

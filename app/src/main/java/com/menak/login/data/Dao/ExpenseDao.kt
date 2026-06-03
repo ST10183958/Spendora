@@ -4,42 +4,40 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.menak.login.data.Entity.CategorySpendingTotal
 import com.menak.login.data.Entity.ExpenseEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ExpenseDao {
 
+    // Insert expense
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertExpense(expense: ExpenseEntity)
+    suspend fun insert(expense: ExpenseEntity)
 
+    // Get all expenses
     @Query("SELECT * FROM expenses ORDER BY id DESC")
     fun getAllExpenses(): Flow<List<ExpenseEntity>>
 
+    // Delete expense
+    @Query("DELETE FROM expenses WHERE id = :id")
+    suspend fun deleteExpense(id: Int)
+
+    // Get expenses between dates (FOR ANALYTICS)
     @Query("""
         SELECT * FROM expenses
-        WHERE startDate >= :fromDate AND endDate <= :toDate
+        WHERE startDate BETWEEN :from AND :to
+        ORDER BY startDate ASC
+    """)
+    fun getExpensesBetweenDates(
+        from: String,
+        to: String
+    ): Flow<List<ExpenseEntity>>
+
+    // Get expenses by category (useful for filtering UI)
+    @Query("""
+        SELECT * FROM expenses
+        WHERE categoryId = :categoryId
         ORDER BY startDate DESC
     """)
-    fun getExpensesBetweenDates(fromDate: String, toDate: String): Flow<List<ExpenseEntity>>
-
-    @Query("""
-        SELECT 
-            c.id AS categoryId,
-            c.type AS categoryType,
-            c.iconUrl AS categoryIconUrl,
-            COALESCE(SUM(e.amount), 0) AS totalSpent
-        FROM categories c
-        LEFT JOIN expenses e
-            ON c.id = e.categoryId
-            AND e.startDate >= :fromDate
-            AND e.endDate <= :toDate
-        GROUP BY c.id, c.type, c.iconUrl
-        ORDER BY c.type ASC
-    """)
-    fun getCategoryTotalsBetweenDates(
-        fromDate: String,
-        toDate: String,
-    ): Flow<List<CategorySpendingTotal>>
+    fun getExpensesByCategory(categoryId: Int): Flow<List<ExpenseEntity>>
 }

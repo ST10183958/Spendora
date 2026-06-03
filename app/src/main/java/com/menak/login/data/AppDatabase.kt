@@ -16,7 +16,6 @@ import com.menak.login.data.Entity.UserEntity
 
 @Database(
     entities = [
-        UserEntity::class,
         CategoryEntity::class,
         ExpenseEntity::class,
         BudgetGoalEntity::class,

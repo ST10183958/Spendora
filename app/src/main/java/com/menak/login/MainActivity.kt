@@ -3,59 +3,83 @@ package com.menak.login
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.menak.login.data.AppDatabase
-import com.menak.login.data.Repository.AuthRepository
 import com.menak.login.data.Repository.ExpenseRepository
+import com.menak.login.data.Repository.FirebaseAuthRepository
 import com.menak.login.navigation.AppNavGraph
 import com.menak.login.navigation.AuthNavGraph
-import com.menak.login.ui.AuthViewModel
-import com.menak.login.ui.AuthViewModelFactory
-import com.menak.login.ui.ExpenseViewModel
-import com.menak.login.ui.ExpenseViewModelFactory
 import com.menak.login.theme.LoginTheme
+import com.menak.login.ui.*
 
 class MainActivity : ComponentActivity() {
+
+    private val auth by lazy { FirebaseAuth.getInstance() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val database = AppDatabase.getDatabase(applicationContext)
+        val firestore = FirebaseFirestore.getInstance()
 
-        val authRepository = AuthRepository(database.userDao())
-        val authFactory = AuthViewModelFactory(authRepository)
+        // ✅ FIREBASE AUTH REPOSITORY (FIXED)
+        val authRepository = FirebaseAuthRepository(auth)
 
         val expenseRepository = ExpenseRepository(
             categoryDao = database.categoryDao(),
             expenseDao = database.expenseDao(),
-            budgetDao = database.budgetDao()
+            budgetDao = database.budgetDao(),
+            firestore = firestore
         )
+
+        val authFactory = AuthViewModelFactory(authRepository)
         val expenseFactory = ExpenseViewModelFactory(expenseRepository)
 
         setContent {
             LoginTheme {
-                val authViewModel: AuthViewModel = viewModel(factory = authFactory)
-                val expenseViewModel: ExpenseViewModel = viewModel(factory = expenseFactory)
+
+                val authViewModel: AuthViewModel =
+                    viewModel(factory = authFactory)
+
+                val expenseViewModel: ExpenseViewModel =
+                    viewModel(factory = expenseFactory)
 
                 val authUiState by authViewModel.uiState.collectAsState()
 
-                if (authUiState.isLoggedIn) {
-                    val appNavController = rememberNavController()
+                val firebaseUser = auth.currentUser
+
+                val isLoggedIn =
+                    authUiState.isLoggedIn || firebaseUser != null
+
+                if (isLoggedIn) {
+
+                    val username =
+                        authUiState.loggedInUsername.ifEmpty {
+                            firebaseUser?.email ?: "User"
+                        }
+
+                    val navController = rememberNavController()
 
                     AppNavGraph(
-    navController = appNavController,
-    viewModel = expenseViewModel,
-    username = authUiState.loggedInUsername,
-    onLogout = { authViewModel.logout() }
+                        navController = navController,
+                        viewModel = expenseViewModel,
+                        username = username,
+                        onLogout = {
+                            authViewModel.logout()
+                            auth.signOut()
+                        }
                     )
+
                 } else {
-                    val authNavController = rememberNavController()
+
+                    val navController = rememberNavController()
 
                     AuthNavGraph(
-                        navController = authNavController,
+                        navController = navController,
                         viewModel = authViewModel
                     )
                 }

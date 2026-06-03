@@ -3,7 +3,7 @@ package com.menak.login.ui
 import com.menak.login.data.Entity.BudgetGoalEntity
 import com.menak.login.data.Entity.CategoryBudgetLimitEntity
 import com.menak.login.data.Entity.CategoryEntity
-import com.menak.login.data.Entity.CategorySpendingTotal
+import com.menak.login.data.Entity.CategoryTotal
 import com.menak.login.data.Entity.ExpenseEntity
 
 data class ExpenseUiState(
@@ -38,15 +38,18 @@ data class ExpenseUiState(
     val categories: List<CategoryEntity> = emptyList(),
     val expenses: List<ExpenseEntity> = emptyList(),
     val filteredExpenses: List<ExpenseEntity> = emptyList(),
-    val categoryTotals: List<CategorySpendingTotal> = emptyList(),
+
+    // ✅ FIXED LINE
+    val categoryTotals: List<CategoryTotal> = emptyList(),
+
     val budgetGoal: BudgetGoalEntity? = null,
     val categoryBudgetLimits: List<CategoryBudgetLimitEntity> = emptyList(),
+
     val currentMonthLabel: String = "",
     val monthlyBudgetAmount: Double = 0.0,
     val monthlySpentAmount: Double = 0.0,
     val monthlyRemainingAmount: Double = 0.0,
+
     val dashboardCategorySpending: List<CategoryDashboardItem> = emptyList(),
     val message: String = ""
-
-
 )
